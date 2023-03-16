@@ -1,6 +1,7 @@
 import pygame
 import logging
 import sys
+
 import Board
 
 WIDTH = 512
@@ -30,17 +31,50 @@ def main():
     pygame.display.set_icon(programIcon)
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     screen.fill(pygame.Color('white'))
-        
-    board = Board.GameState()
+    
+    playerClicks = [[], []]
+      
+    board = Board.Board()
+    move = Board.Move(playerClicks, board.board)
+    
     loadImages()
     running = True
     
     while running == True:
         for event in pygame.event.get():
+            
+            # check for Quit
             if event.type == pygame.QUIT:
-                running = False 
-        drawGameState(screen, board.board)
-        pygame.display.flip()
+                running = False
+            
+            # handle MOUSEBUTTONUP
+            if event.type == pygame.MOUSEBUTTONUP:
+                pos = pygame.mouse.get_pos()
+                posxy = [pos[0] // SQ_SIZE, pos[1] // SQ_SIZE]  # i want to se the board like a matrix
+                logging.info("position selected: ",  posxy)
+            
+                # check if is a piece
+                if board.board[posxy[0]][posxy[1]] != '--':
+                    print('piece selected -> ', board.board[posxy[0]][posxy[1]])
+                    logging.info("piece selected: ", board.board[posxy[0]][posxy[1]])   
+                    
+                    if playerClicks[0] == []:
+                        playerClicks[0] = posxy
+                    
+                    elif playerClicks[0] == posxy:
+                        playerClicks[0] = []
+
+                elif playerClicks[0] != []:
+                    if playerClicks[1] == []:
+                        playerClicks[1] = posxy
+                        playerClicks = move.modifyPosition(playerClicks)
+                        
+                print(playerClicks)
+
+            # draw
+            drawGameState(screen, board.board)
+            pygame.display.flip()
+
 
 def drawGameState(screen, board):
     drawBoard(screen) # draw squares on the board
@@ -54,15 +88,15 @@ def drawBoard(screen):
                 color = colors[0]
             else:
                 color = colors[1] 
-            pygame.draw.rect(screen, color, pygame.Rect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE))
-    
+            pygame.draw.rect(screen, color, pygame.Rect(i*SQ_SIZE, j*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+
 def drawPieces(screen, board):
     for i in range(DIMENSION):
         for j in range(DIMENSION):
             piece = board[i][j]
             if piece != "--":
                 try:
-                    screen.blit(IMAGES[piece], pygame.Rect(j*SQ_SIZE, i*SQ_SIZE, SQ_SIZE, SQ_SIZE))  
+                    screen.blit(IMAGES[piece], pygame.Rect(i*SQ_SIZE, j*SQ_SIZE, SQ_SIZE, SQ_SIZE))  
                     logging.info("piece '" + piece + "' loaded into the board")
                 except:
                     logging.error( sys.argv[0] + " -> cannot load piece '" + piece + "' into the board")

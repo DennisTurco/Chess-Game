@@ -18,9 +18,9 @@ def loadImages():
         try:
             image = "images/" + piece + ".png"
             IMAGES[piece] = pygame.transform.scale(pygame.image.load(image), (SQ_SIZE, SQ_SIZE))
-            logging.info("image '" + image + "' loaded")
+            logging.info("image '{}' loaded", format(image))
         except:
-            logging.error( sys.argv[0] + " -> error on loading image '" + image + "'")
+            logging.error("{} -> error on loading image '{}'", format(sys.argv[0], image))
     
 
 def main():
@@ -51,12 +51,12 @@ def main():
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
                 posxy = [pos[0] // SQ_SIZE, pos[1] // SQ_SIZE]  # i want to se the board like a matrix
-                logging.info("position selected: ",  posxy)
+                logging.info("position selected: {}",  format(posxy))
             
                 # check if is a piece
                 if board.board[posxy[0]][posxy[1]] != '--':
-                    print('piece selected -> ', board.board[posxy[0]][posxy[1]])
-                    logging.info("piece selected: ", board.board[posxy[0]][posxy[1]])   
+                    print('piece selected -> {}', format(board.board[posxy[0]][posxy[1]]))
+                    logging.info("piece selected: {}", format(board.board[posxy[0]][posxy[1]]))   
                     
                     if playerClicks[0] == []:
                         playerClicks[0] = posxy
@@ -64,10 +64,12 @@ def main():
                     elif playerClicks[0] == posxy:
                         playerClicks[0] = []
 
+                # check if first position is selected
                 elif playerClicks[0] != []:
                     if playerClicks[1] == []:
                         playerClicks[1] = posxy
-                        playerClicks = move.modifyPosition(playerClicks)
+                        move.moveRequest(playerClicks)
+                        playerClicks = [[], []]
                         
                 print(playerClicks)
 
@@ -77,7 +79,9 @@ def main():
 
 
 def drawGameState(screen, board):
-    drawBoard(screen) # draw squares on the board
+    # draw squares on the board
+    drawBoard(screen) 
+    # draw pieces on the board
     drawPieces(screen, board)
 
 def drawBoard(screen):
@@ -97,9 +101,9 @@ def drawPieces(screen, board):
             if piece != "--":
                 try:
                     screen.blit(IMAGES[piece], pygame.Rect(i*SQ_SIZE, j*SQ_SIZE, SQ_SIZE, SQ_SIZE))  
-                    logging.info("piece '" + piece + "' loaded into the board")
+                    logging.info("piece '{}' loaded into the board", format(piece))
                 except:
-                    logging.error( sys.argv[0] + " -> cannot load piece '" + piece + "' into the board")
+                    logging.error("{} -> cannot load piece '{}' into the board", format(sys.argv[0], piece))
 
 if __name__ == "__main__":
     main()

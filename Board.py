@@ -3,6 +3,7 @@
 
 import logging
 import sys
+from playsound import playsound
 
 class Board():
 
@@ -16,93 +17,142 @@ class Board():
             ["bB", "bp", "--", "--", "--", "--", "wp", "wB"],
             ["bN", "bp", "--", "--", "--", "--", "wp", "wN"],
             ["bR", "bp", "--", "--", "--", "--", "wp", "wR"],]
-        
-    def getPieceName(self, playerClicks):
-        return self.board[playerClicks[0][0]][playerClicks[0][1]]
-
 
 # -----------------------------------------------------------------
 
 class Move():
 
     def __init__(self, playerClicks, board):
-        self.playerClicks = playerClicks
+        self.pos_start = playerClicks[0]
+        self.pos_final = playerClicks[1]
         self.board = board
         self.whiteMove = True
         self.finished = False
 
-    def modifyPosition(self, playerClicks):
-        piece_name = Board.getPieceName(playerClicks)
-        self.board[playerClicks[1][0]][playerClicks[1][1]] = piece_name
-        self.board[playerClicks[0][0]][playerClicks[0][1]] = '--'
-
-
-    def moveRequest(self, playerClicks):
+    def modifyPosition(self):
+        piece_name = self.getPieceName()
         
+        # check if it is a simple move or someone is capturing a piece to play the correct sound
+        if self.board[self.pos_final[0]][self.pos_final[1]] == '--':
+            sound = "sounds/move.mp3"
+            #try: playsound(sound)
+            #except: logging.error(sys.argv[0] + " -> error on loading sound '" + sound + "'")
+        else:
+            sound = "sounds/capture.mp3"
+            #try: playsound(sound)
+            #except: logging.error(sys.argv[0] + " -> error on loading sound '" + sound + "'")
+            
+            
+        self.board[self.pos_final[0]][self.pos_final[1]] = piece_name
+        self.board[self.pos_start[0]][self.pos_start[1]] = '--'
+        
+        if self.whiteMove == True: 
+            self.whiteMove = False
+        else:
+            self.whiteMove = True
+        
+    
+    def captureRequest(self, playerClicks):
         if self.finished: return
         
-        piece_name = Board.getPieceName(playerClicks)
+        # set pos_start and pos_final
+        self.setPlayerClicks(playerClicks)
+        
+        self.modifyPosition()   
+        
+
+    def moveRequest(self, playerClicks):
+        if self.finished: return
+        
+        # set pos_start and pos_final
+        self.setPlayerClicks(playerClicks)
+        
+        piece_name = self.getPieceName()
         
         # errors check
         if piece_name[0] == "w" and self.whiteMove == False:
-            logging.error("{} -> 'piece_name[0] == \"w\" and self.whiteMove == False' ", format(sys.argv[0]))
+            logging.error(sys.argv[0] + " -> 'piece_name[0] == \"w\" and self.whiteMove == False' ")
             return
         elif piece_name[0] == "b" and self.whiteMove == True:
-            logging.error("{} -> 'piece_name[0] == \"b\" and self.whiteMove == True' ", format(sys.argv[0]))
+            logging.error(sys.argv[0] + " -> 'piece_name[0] == \"b\" and self.whiteMove == True' ")
             return
         
         # pawns
         if piece_name[1] == 'p':
-            self.pawnMove(playerClicks)
+            self.pawnMove()
         
         # rocks
         elif piece_name[1] == 'R':
-            self.rockMove(playerClicks)
+            self.rockMove()
         
         # bishops
         elif piece_name[1] == 'B':
-            self.rockMove(playerClicks)
+            self.rockMove()
         
         # knights
         elif piece_name[1] == 'K':
-            self.rockMove(playerClicks)
+            self.rockMove()
             
         # queen
         elif piece_name[1] == 'Q':
-            self.rockMove(playerClicks)
+            self.rockMove()
             
         # king
         elif piece_name[1] == 'K':
-            self.rockMove(playerClicks)
+            self.rockMove()
             
         else:
-            logging.error("{} -> piece: '{}' doesn't exist", format(sys.argv[0], piece_name[1]))
+            logging.error(sys.argv[0] + " -> piece: '" + piece_name + "' doesn't exist")
             return
             
-    def pawnMove(self, playerClicks):
+    def pawnMove(self):
         # white turn
-        if self.whiteMove:
-            if (playerClicks[0][1] == playerClicks[1][1]+1) or (playerClicks[0][1] == playerClicks[1][1]+2 and playerClicks[0][1] == 6):
-                self.modifyPosition(playerClicks)
-                self.whiteMove = False
+        if self.whiteMove:            
+            if (self.pos_start[1] == self.pos_final[1]+1 and self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]+2 and self.pos_start[0] == self.pos_final[0] and self.pos_final[1] == 4):
+                self.modifyPosition()
             else: return
         # black turn
         else:
-            if (playerClicks[0][1] == playerClicks[1][1]+1) or (playerClicks[0][1] == playerClicks[1][1]-2 and playerClicks[0][1] == 2):
-                self.modifyPosition(playerClicks)
-                self.whiteMove = True
+            if (self.pos_start[1] == self.pos_final[1]-1 and self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]-2 and self.pos_start[0] == self.pos_final[0] and self.pos_final[1] == 3):
+                self.modifyPosition()
             else: return
     
-    def rockMove(self, playerClicks):
-        # white turn
-        if self.whiteMove:
-            if True:
-                self.modifyPosition(playerClicks)
-                self.whiteMove = False
-            else: return
-        # black turn
-        else:
-            if True:
-                self.modifyPosition(playerClicks)
-                self.whiteMove = True
-            else: return
+    def rockMove(self):
+        # check if final position is correct for rock
+        if (self.pos_final[0] == self.pos_final[0]) or (self.pos_final[1] == self.pos_final[1]):
+            
+            i = j = 1
+            
+            # check if there is a piece in the middle
+            if self.pos_start[1] > self.pos_final[1]:           # the movement is from top to down
+                while self.pos_start[1]-i != self.pos_final[1]:
+                    if self.board[self.pos_start[0]][self.pos_start[1]-i] != '--': 
+                        return
+                    i = i + 1
+            elif self.pos_start[1] < self.pos_final[1]:         # the movement is from down to top
+                while self.pos_start[1]+i != self.pos_final[1]:
+                    if self.board[self.pos_start[0]][self.pos_start[1]+i] != '--': 
+                        return
+                    i = i + 1
+            if self.pos_start[0] > self.pos_final[0]:           # the movement is from right to left
+                while self.pos_start[0]-j != self.pos_final[0]:
+                    if self.board[self.pos_start[0]-j][self.pos_start[1]] != '--': 
+                        return
+                    j = j + 1
+            elif self.pos_start[0] < self.pos_final[0]:         # the movement is from right to left
+                while self.pos_start[0]+j != self.pos_final[0]:
+                    if self.board[self.pos_start[0]+j][self.pos_start[1]] != '--': 
+                        return
+                    j = j + 1
+            
+            # let the movement
+            self.modifyPosition()
+        
+        else: return
+     
+    def getPieceName(self):
+        return self.board[self.pos_start[0]][self.pos_start[1]]
+    
+    def setPlayerClicks(self, playerClicks):
+        self.pos_start = playerClicks[0]
+        self.pos_final = playerClicks[1]

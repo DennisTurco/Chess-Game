@@ -5,7 +5,7 @@ import logging
 import sys
 from pydub import AudioSegment
 from pydub.playback import play
-import simpleaudio as sa
+import simpleaudio
 
 
 class Board():
@@ -34,8 +34,8 @@ class Move():
         self.finished = False    
         
         try:
-            self.sound_move = AudioSegment.from_wav("sounds/move.wav")
-            self.sound_capture = AudioSegment.from_wav("sounds/capture.wav")
+            self.sound_move = simpleaudio.WaveObject.from_wave_file("sounds/move.wav")
+            self.sound_capture = simpleaudio.WaveObject.from_wave_file("sounds/capture.wav")
         except:
             logging.error(sys.argv[0] + " -> error on loading sounds")
 
@@ -44,10 +44,10 @@ class Move():
         
         # check if it is a simple move or someone is capturing a piece to play the correct sound
         if self.board[self.pos_final[0]][self.pos_final[1]] == '--':
-            play(self.sound_move)
-            #logging.error(sys.argv[0] + " -> error on playing sound")
+            try: self.sound_move.play()
+            except: logging.error(sys.argv[0] + " -> error on playing sound")
         else:
-            try: play(self.sound_capture)
+            try: self.sound_capture.play()
             except: logging.error(sys.argv[0] + " -> error on playing sound")
             
             

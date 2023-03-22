@@ -3,7 +3,10 @@
 
 import logging
 import sys
-from playsound import playsound
+from pydub import AudioSegment
+from pydub.playback import play
+import simpleaudio as sa
+
 
 class Board():
 
@@ -23,24 +26,29 @@ class Board():
 class Move():
 
     def __init__(self, playerClicks, board):
+        
         self.pos_start = playerClicks[0]
         self.pos_final = playerClicks[1]
         self.board = board
         self.whiteMove = True
-        self.finished = False
+        self.finished = False    
+        
+        try:
+            self.sound_move = AudioSegment.from_wav("sounds/move.wav")
+            self.sound_capture = AudioSegment.from_wav("sounds/capture.wav")
+        except:
+            logging.error(sys.argv[0] + " -> error on loading sounds")
 
     def modifyPosition(self):
         piece_name = self.getPieceName()
         
         # check if it is a simple move or someone is capturing a piece to play the correct sound
         if self.board[self.pos_final[0]][self.pos_final[1]] == '--':
-            sound = "sounds/move.mp3"
-            #try: playsound(sound)
-            #except: logging.error(sys.argv[0] + " -> error on loading sound '" + sound + "'")
+            play(self.sound_move)
+            #logging.error(sys.argv[0] + " -> error on playing sound")
         else:
-            sound = "sounds/capture.mp3"
-            #try: playsound(sound)
-            #except: logging.error(sys.argv[0] + " -> error on loading sound '" + sound + "'")
+            try: play(self.sound_capture)
+            except: logging.error(sys.argv[0] + " -> error on playing sound")
             
             
         self.board[self.pos_final[0]][self.pos_final[1]] = piece_name
@@ -52,13 +60,18 @@ class Move():
             self.whiteMove = True
         
     
-    def captureRequest(self, playerClicks):
+    def captureRequest(self, playerClicks):        
         if self.finished: return
         
         # set pos_start and pos_final
         self.setPlayerClicks(playerClicks)
         
-        self.modifyPosition()   
+        # the white piace cannot eat another white piece (same for black)
+        piece_name = self.board[self.pos_final[0]][self.pos_final[1]]
+        if  (self.whiteMove == True and piece_name[0] == 'w') or (self.whiteMove == False and piece_name[0] == 'b'):
+            return
+        else:
+            self.moveRequest(playerClicks)   
         
 
     def moveRequest(self, playerClicks):
@@ -87,19 +100,19 @@ class Move():
         
         # bishops
         elif piece_name[1] == 'B':
-            self.rockMove()
+            self.bishopMove()
         
         # knights
-        elif piece_name[1] == 'K':
-            self.rockMove()
+        elif piece_name[1] == 'N':
+            self.knightMove()
             
         # queen
         elif piece_name[1] == 'Q':
-            self.rockMove()
+            self.queenMove()
             
         # king
         elif piece_name[1] == 'K':
-            self.rockMove()
+            self.kingMove()
             
         else:
             logging.error(sys.argv[0] + " -> piece: '" + piece_name + "' doesn't exist")
@@ -118,8 +131,8 @@ class Move():
             else: return
     
     def rockMove(self):
-        # check if final position is correct for rock
-        if (self.pos_final[0] == self.pos_final[0]) or (self.pos_final[1] == self.pos_final[1]):
+        # check if final position is correct for rock        
+        if (self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]):
             
             i = j = 1
             
@@ -134,7 +147,7 @@ class Move():
                     if self.board[self.pos_start[0]][self.pos_start[1]+i] != '--': 
                         return
                     i = i + 1
-            if self.pos_start[0] > self.pos_final[0]:           # the movement is from right to left
+            elif self.pos_start[0] > self.pos_final[0]:           # the movement is from right to left
                 while self.pos_start[0]-j != self.pos_final[0]:
                     if self.board[self.pos_start[0]-j][self.pos_start[1]] != '--': 
                         return
@@ -149,6 +162,97 @@ class Move():
             self.modifyPosition()
         
         else: return
+        
+    def bishopMove(self):                
+        # check if final position is correct for the king    
+        pos_diff = [0, 0]
+        
+        # find x diff
+        if self.pos_start[0] <= self.pos_final[0]:
+            pos_diff[0] =  self.pos_final[0] - self.pos_start[0]
+        elif self.pos_start[0] > self.pos_final[0]:
+            pos_diff[0] =  self.pos_start[0] - self.pos_final[0]
+        
+        # find the y diff
+        if self.pos_start[1] <= self.pos_final[1]:
+            pos_diff[1] =  self.pos_final[1] - self.pos_start[1]
+        elif self.pos_start[1] > self.pos_final[1]:
+            pos_diff[1] =  self.pos_start[1] - self.pos_final[1]
+                    
+        # allow the movement only if the of pos_diff x and y is equal  
+        if pos_diff[0] == pos_diff[1]:
+            # check if there is a piece in the middle
+            i = 1
+            if self.pos_start[0] < self.pos_final[0] and self.pos_start[1] > self.pos_final[1]:     # the movement is to left-down
+                    while self.pos_start[0]+i != self.pos_final[0]:
+                        if self.board[self.pos_start[0]+i][self.pos_start[1]-i] != '--': 
+                            return
+                        i = i + 1
+            elif self.pos_start[0] < self.pos_final[0] and self.pos_start[1] < self.pos_final[1]:   # the movement is to left-top
+                while self.pos_start[1]+i != self.pos_final[1]:
+                    if self.board[self.pos_start[0]+i][self.pos_start[1]+i] != '--': 
+                        return
+                    i = i + 1
+            elif self.pos_start[0] > self.pos_final[0] and self.pos_start[1] > self.pos_final[1]:   # the movement is to right-down
+                while self.pos_start[0]-i != self.pos_final[0]:
+                    if self.board[self.pos_start[0]-i][self.pos_start[1]-i] != '--': 
+                        return
+                    i = i + 1
+            elif self.pos_start[0] > self.pos_final[0] and self.pos_start[1] < self.pos_final[1]:   # the movement is to right-top
+                while self.pos_start[0]-i != self.pos_final[0]:
+                    if self.board[self.pos_start[0]-i][self.pos_start[1]+i] != '--': 
+                        return
+                    i = i + 1
+            self.modifyPosition()
+        
+        
+    def knightMove(self):
+        
+        # check if final position is correct for the king    
+        pos_diff = [0, 0]
+        
+        # find x diff
+        if self.pos_start[0] <= self.pos_final[0]:
+            pos_diff[0] =  self.pos_final[0] - self.pos_start[0]
+        elif self.pos_start[0] > self.pos_final[0]:
+            pos_diff[0] =  self.pos_start[0] - self.pos_final[0]
+        
+        # find the y diff
+        if self.pos_start[1] <= self.pos_final[1]:
+            pos_diff[1] =  self.pos_final[1] - self.pos_start[1]
+        elif self.pos_start[1] > self.pos_final[1]:
+            pos_diff[1] =  self.pos_start[1] - self.pos_final[1] 
+        
+        
+        # allow the movement only if the sum of pos_diff x and y is == 3  
+        if pos_diff[0] + pos_diff[1] == 3:
+            self.modifyPosition()
+    
+    def queenMove(self):
+        
+        self.modifyPosition()
+    
+    def kingMove(self):
+        
+        # check if final position is correct for the king    
+        pos_diff = [0, 0]
+        
+        # find x diff
+        if self.pos_start[0] <= self.pos_final[0]:
+            pos_diff[0] =  self.pos_final[0] - self.pos_start[0]
+        elif self.pos_start[0] > self.pos_final[0]:
+            pos_diff[0] =  self.pos_start[0] - self.pos_final[0]
+        
+        # find the y diff
+        if self.pos_start[1] <= self.pos_final[1]:
+            pos_diff[1] =  self.pos_final[1] - self.pos_start[1]
+        elif self.pos_start[1] > self.pos_final[1]:
+            pos_diff[1] =  self.pos_start[1] - self.pos_final[1]
+        
+        # allow the movement only if the pos_diff x and y is <= 1  
+        if (pos_diff[0] == 1 or pos_diff[0] == 0 or pos_diff[0] == -1) and (pos_diff[1] == 1 or pos_diff[1] == 0 or pos_diff[1] == -1):
+            self.modifyPosition()
+        
      
     def getPieceName(self):
         return self.board[self.pos_start[0]][self.pos_start[1]]

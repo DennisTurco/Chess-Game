@@ -53,7 +53,6 @@ def main():
             
                 # check if is a piece
                 if board.board[posxy[0]][posxy[1]] != '--':
-                    print('piece selected -> {}', format(board.board[posxy[0]][posxy[1]]))
                     
                     if playerClicks[0] == []:
                         playerClicks[0] = posxy

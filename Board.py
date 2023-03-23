@@ -3,9 +3,9 @@
 
 import logging
 import sys
-from pydub import AudioSegment
-from pydub.playback import play
 import simpleaudio
+import tkinter
+from tkinter import messagebox
 
 
 class Board():
@@ -23,10 +23,24 @@ class Board():
 
 # -----------------------------------------------------------------
 
+class MessageBox():
+    
+    def __init__(self, board):
+        self.whiteWin = "White has won the game!"
+        self.blackWin = "Black has won the game!"
+        self.titleMessage = "Good Job"
+        
+    def setWinner(self, isWhite):
+        # check the winner        
+        if isWhite: messagebox.showinfo(self.titleMessage, self.whiteWin)
+        else: messagebox.showinfo(self.titleMessage, self.blackWin)
+        
+
+# -----------------------------------------------------------------
+
 class Move():
 
-    def __init__(self, playerClicks, board):
-        
+    def __init__(self, playerClicks, board):     
         self.pos_start = playerClicks[0]
         self.pos_final = playerClicks[1]
         self.board = board
@@ -39,19 +53,17 @@ class Move():
         except:
             logging.error(sys.argv[0] + " -> error on loading sounds")
 
+
     def modifyPosition(self):
-        piece_name = self.getPieceName()
-        
         # check if it is a simple move or someone is capturing a piece to play the correct sound
-        if self.board[self.pos_final[0]][self.pos_final[1]] == '--':
+        if self.getTargetPieceName() == '--':
             try: self.sound_move.play()
             except: logging.error(sys.argv[0] + " -> error on playing sound")
         else:
             try: self.sound_capture.play()
             except: logging.error(sys.argv[0] + " -> error on playing sound")
             
-            
-        self.board[self.pos_final[0]][self.pos_final[1]] = piece_name
+        self.board[self.pos_final[0]][self.pos_final[1]] = self.getCurrentPieceName()
         self.board[self.pos_start[0]][self.pos_start[1]] = '--'
         
         if self.whiteMove == True: 
@@ -67,11 +79,12 @@ class Move():
         self.setPlayerClicks(playerClicks)
         
         # the white piace cannot eat another white piece (same for black)
-        piece_name = self.board[self.pos_final[0]][self.pos_final[1]]
+        piece_name = self.getTargetPieceName()
         if  (self.whiteMove == True and piece_name[0] == 'w') or (self.whiteMove == False and piece_name[0] == 'b'):
             return
         else:
-            self.moveRequest(playerClicks)   
+            self.moveRequest(playerClicks) 
+            self.finished = self.isFinished()  
         
 
     def moveRequest(self, playerClicks):
@@ -80,7 +93,7 @@ class Move():
         # set pos_start and pos_final
         self.setPlayerClicks(playerClicks)
         
-        piece_name = self.getPieceName()
+        piece_name = self.getCurrentPieceName()
         
         # errors check
         if piece_name[0] == "w" and self.whiteMove == False:
@@ -117,18 +130,28 @@ class Move():
         else:
             logging.error(sys.argv[0] + " -> piece: '" + piece_name + "' doesn't exist")
             return
+      
             
-    def pawnMove(self):
+    def pawnMove(self):        
         # white turn
-        if self.whiteMove:            
-            if (self.pos_start[1] == self.pos_final[1]+1 and self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]+2 and self.pos_start[0] == self.pos_final[0] and self.pos_final[1] == 4):
+        if self.whiteMove: 
+            # move down to top           
+            if ((self.pos_start[1] == self.pos_final[1]+1 and self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]+2 and self.pos_start[0] == self.pos_final[0] and self.pos_final[1] == 4)) and self.getTargetPieceName() == '--':                
+                self.modifyPosition()
+            # capture
+            elif ((self.pos_start[0]-1 == self.pos_final[0] and self.pos_start[1]-1 == self.pos_final[1]) or (self.pos_start[0]+1 == self.pos_final[0] and self.pos_start[1]-1 == self.pos_final[1])) and self.getTargetPieceName() != '--':
                 self.modifyPosition()
             else: return
         # black turn
         else:
-            if (self.pos_start[1] == self.pos_final[1]-1 and self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]-2 and self.pos_start[0] == self.pos_final[0] and self.pos_final[1] == 3):
+            # move top to down
+            if ((self.pos_start[1] == self.pos_final[1]-1 and self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]-2 and self.pos_start[0] == self.pos_final[0] and self.pos_final[1] == 3)) and self.getTargetPieceName() == '--':
+                self.modifyPosition()
+            # capture
+            elif ((self.pos_start[0]+1 == self.pos_final[0] and self.pos_start[0]-1 == self.pos_final[0]) or (self.pos_start[1]+1 == self.pos_final[1] and self.pos_start[1]+1 == self.pos_final[1])) and self.getTargetPieceName() != '--':
                 self.modifyPosition()
             else: return
+    
     
     def rockMove(self):
         # check if final position is correct for rock        
@@ -157,37 +180,25 @@ class Move():
                     if self.board[self.pos_start[0]+j][self.pos_start[1]] != '--': 
                         return
                     j = j + 1
-            
-            # let the movement
-            self.modifyPosition()
+            else:
+                # let the movement
+                self.modifyPosition()
         
         else: return
+      
         
     def bishopMove(self):                
-        # check if final position is correct for the king    
-        pos_diff = [0, 0]
+        # check if final position is correct for the bishop    
+        pos_diff = self.getPositionDifference()          
         
-        # find x diff
-        if self.pos_start[0] <= self.pos_final[0]:
-            pos_diff[0] =  self.pos_final[0] - self.pos_start[0]
-        elif self.pos_start[0] > self.pos_final[0]:
-            pos_diff[0] =  self.pos_start[0] - self.pos_final[0]
-        
-        # find the y diff
-        if self.pos_start[1] <= self.pos_final[1]:
-            pos_diff[1] =  self.pos_final[1] - self.pos_start[1]
-        elif self.pos_start[1] > self.pos_final[1]:
-            pos_diff[1] =  self.pos_start[1] - self.pos_final[1]
-                    
-        # allow the movement only if the of pos_diff x and y is equal  
-        if pos_diff[0] == pos_diff[1]:
+        if pos_diff[0] == pos_diff[1]: # allow the movement only if the of pos_diff x and y is equal  
             # check if there is a piece in the middle
             i = 1
             if self.pos_start[0] < self.pos_final[0] and self.pos_start[1] > self.pos_final[1]:     # the movement is to left-down
-                    while self.pos_start[0]+i != self.pos_final[0]:
-                        if self.board[self.pos_start[0]+i][self.pos_start[1]-i] != '--': 
-                            return
-                        i = i + 1
+                while self.pos_start[0]+i != self.pos_final[0]:
+                    if self.board[self.pos_start[0]+i][self.pos_start[1]-i] != '--': 
+                        return
+                    i = i + 1
             elif self.pos_start[0] < self.pos_final[0] and self.pos_start[1] < self.pos_final[1]:   # the movement is to left-top
                 while self.pos_start[1]+i != self.pos_final[1]:
                     if self.board[self.pos_start[0]+i][self.pos_start[1]+i] != '--': 
@@ -203,38 +214,40 @@ class Move():
                     if self.board[self.pos_start[0]-i][self.pos_start[1]+i] != '--': 
                         return
                     i = i + 1
-            self.modifyPosition()
+            else:
+                # let the movement
+                self.modifyPosition()
         
         
     def knightMove(self):
-        
         # check if final position is correct for the king    
-        pos_diff = [0, 0]
+        pos_diff = self.getPositionDifference() 
         
-        # find x diff
-        if self.pos_start[0] <= self.pos_final[0]:
-            pos_diff[0] =  self.pos_final[0] - self.pos_start[0]
-        elif self.pos_start[0] > self.pos_final[0]:
-            pos_diff[0] =  self.pos_start[0] - self.pos_final[0]
-        
-        # find the y diff
-        if self.pos_start[1] <= self.pos_final[1]:
-            pos_diff[1] =  self.pos_final[1] - self.pos_start[1]
-        elif self.pos_start[1] > self.pos_final[1]:
-            pos_diff[1] =  self.pos_start[1] - self.pos_final[1] 
-        
-        
-        # allow the movement only if the sum of pos_diff x and y is == 3  
-        if pos_diff[0] + pos_diff[1] == 3:
+        if pos_diff[0] + pos_diff[1] == 3:  # allow the movement only if the sum of pos_diff x and y is == 3  
             self.modifyPosition()
     
+    
     def queenMove(self):
-        
-        self.modifyPosition()
+        self.modifyPosition() 
+    
     
     def kingMove(self):
-        
         # check if final position is correct for the king    
+        pos_diff = self.getPositionDifference()  
+        
+        if (pos_diff[0] == 1 or pos_diff[0] == 0 or pos_diff[0] == -1) and (pos_diff[1] == 1 or pos_diff[1] == 0 or pos_diff[1] == -1): # allow the movement only if the pos_diff x and y is <= 1
+            self.modifyPosition()
+        
+     
+    def getCurrentPieceName(self):
+        return self.board[self.pos_start[0]][self.pos_start[1]]
+
+
+    def getTargetPieceName(self):
+        return self.board[self.pos_final[0]][self.pos_final[1]]
+    
+    
+    def getPositionDifference(self):
         pos_diff = [0, 0]
         
         # find x diff
@@ -249,13 +262,13 @@ class Move():
         elif self.pos_start[1] > self.pos_final[1]:
             pos_diff[1] =  self.pos_start[1] - self.pos_final[1]
         
-        # allow the movement only if the pos_diff x and y is <= 1  
-        if (pos_diff[0] == 1 or pos_diff[0] == 0 or pos_diff[0] == -1) and (pos_diff[1] == 1 or pos_diff[1] == 0 or pos_diff[1] == -1):
-            self.modifyPosition()
+        return pos_diff
+    
+    
+    def isFinished(self):
+        if self.finished: MessageBox(self.board)
+        else: return
         
-     
-    def getPieceName(self):
-        return self.board[self.pos_start[0]][self.pos_start[1]]
     
     def setPlayerClicks(self, playerClicks):
         self.pos_start = playerClicks[0]

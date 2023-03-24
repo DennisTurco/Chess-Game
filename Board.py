@@ -4,7 +4,6 @@
 import logging
 import sys
 import simpleaudio
-import tkinter
 from tkinter import messagebox
 
 
@@ -148,7 +147,7 @@ class Move():
             if ((self.pos_start[1] == self.pos_final[1]-1 and self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]-2 and self.pos_start[0] == self.pos_final[0] and self.pos_final[1] == 3)) and self.getTargetPieceName() == '--':
                 self.modifyPosition()
             # capture
-            elif ((self.pos_start[0]+1 == self.pos_final[0] and self.pos_start[0]-1 == self.pos_final[0]) or (self.pos_start[1]+1 == self.pos_final[1] and self.pos_start[1]+1 == self.pos_final[1])) and self.getTargetPieceName() != '--':
+            elif ((self.pos_start[0]+1 == self.pos_final[0] and self.pos_start[1]+1 == self.pos_final[1]) or (self.pos_start[0]-1 == self.pos_final[0] and self.pos_start[1]+1 == self.pos_final[1])) and self.getTargetPieceName() != '--':
                 self.modifyPosition()
             else: return
     
@@ -160,12 +159,12 @@ class Move():
             i = j = 1
             
             # check if there is a piece in the middle
-            if self.pos_start[1] > self.pos_final[1]:           # the movement is from top to down
+            if self.pos_start[1] > self.pos_final[1]:             # the movement is from top to down
                 while self.pos_start[1]-i != self.pos_final[1]:
                     if self.board[self.pos_start[0]][self.pos_start[1]-i] != '--': 
                         return
                     i = i + 1
-            elif self.pos_start[1] < self.pos_final[1]:         # the movement is from down to top
+            elif self.pos_start[1] < self.pos_final[1]:           # the movement is from down to top
                 while self.pos_start[1]+i != self.pos_final[1]:
                     if self.board[self.pos_start[0]][self.pos_start[1]+i] != '--': 
                         return
@@ -175,14 +174,14 @@ class Move():
                     if self.board[self.pos_start[0]-j][self.pos_start[1]] != '--': 
                         return
                     j = j + 1
-            elif self.pos_start[0] < self.pos_final[0]:         # the movement is from right to left
+            elif self.pos_start[0] < self.pos_final[0]:           # the movement is from right to left
                 while self.pos_start[0]+j != self.pos_final[0]:
                     if self.board[self.pos_start[0]+j][self.pos_start[1]] != '--': 
                         return
                     j = j + 1
-            else:
-                # let the movement
-                self.modifyPosition()
+            
+            # let the movement
+            self.modifyPosition()
         
         else: return
       
@@ -194,41 +193,103 @@ class Move():
         if pos_diff[0] == pos_diff[1]: # allow the movement only if the of pos_diff x and y is equal  
             # check if there is a piece in the middle
             i = 1
-            if self.pos_start[0] < self.pos_final[0] and self.pos_start[1] > self.pos_final[1]:     # the movement is to left-down
+            if self.pos_start[0] < self.pos_final[0] and self.pos_start[1] > self.pos_final[1]:     # the movement is to right-top
                 while self.pos_start[0]+i != self.pos_final[0]:
                     if self.board[self.pos_start[0]+i][self.pos_start[1]-i] != '--': 
                         return
                     i = i + 1
-            elif self.pos_start[0] < self.pos_final[0] and self.pos_start[1] < self.pos_final[1]:   # the movement is to left-top
+            elif self.pos_start[0] < self.pos_final[0] and self.pos_start[1] < self.pos_final[1]:   # the movement is to right-down
                 while self.pos_start[1]+i != self.pos_final[1]:
                     if self.board[self.pos_start[0]+i][self.pos_start[1]+i] != '--': 
                         return
                     i = i + 1
-            elif self.pos_start[0] > self.pos_final[0] and self.pos_start[1] > self.pos_final[1]:   # the movement is to right-down
+            elif self.pos_start[0] > self.pos_final[0] and self.pos_start[1] > self.pos_final[1]:   # the movement is to left-top
                 while self.pos_start[0]-i != self.pos_final[0]:
                     if self.board[self.pos_start[0]-i][self.pos_start[1]-i] != '--': 
                         return
                     i = i + 1
-            elif self.pos_start[0] > self.pos_final[0] and self.pos_start[1] < self.pos_final[1]:   # the movement is to right-top
+            elif self.pos_start[0] > self.pos_final[0] and self.pos_start[1] < self.pos_final[1]:   # the movement is to left-down
                 while self.pos_start[0]-i != self.pos_final[0]:
                     if self.board[self.pos_start[0]-i][self.pos_start[1]+i] != '--': 
                         return
                     i = i + 1
-            else:
-                # let the movement
-                self.modifyPosition()
+            
+            # let the movement
+            self.modifyPosition()
         
         
     def knightMove(self):
         # check if final position is correct for the king    
         pos_diff = self.getPositionDifference() 
         
-        if pos_diff[0] + pos_diff[1] == 3:  # allow the movement only if the sum of pos_diff x and y is == 3  
+        if pos_diff[0] + pos_diff[1] == 3 and self.pos_start[1]+3 != self.pos_final[1] and self.pos_start[1]-3 != self.pos_final[1] and self.pos_start[0]+3 != self.pos_final[0] and self.pos_start[0]-3 != self.pos_final[0]:  # allow the movement only if the sum of pos_diff x and y is == 3  
             self.modifyPosition()
     
     
     def queenMove(self):
-        self.modifyPosition() 
+        
+        # check if final position is correct the queen (movement like the rock)     
+        if (self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]):
+            
+            print("movement like the rock")
+            
+            i = j = 1
+            
+            # check if there is a piece in the middle
+            if self.pos_start[1] > self.pos_final[1]:             # the movement is from top to down
+                while self.pos_start[1]-i != self.pos_final[1]:
+                    if self.board[self.pos_start[0]][self.pos_start[1]-i] != '--': 
+                        return
+                    i = i + 1
+            elif self.pos_start[1] < self.pos_final[1]:           # the movement is from down to top
+                while self.pos_start[1]+i != self.pos_final[1]:
+                    if self.board[self.pos_start[0]][self.pos_start[1]+i] != '--': 
+                        return
+                    i = i + 1
+            elif self.pos_start[0] > self.pos_final[0]:           # the movement is from right to left
+                while self.pos_start[0]-j != self.pos_final[0]:
+                    if self.board[self.pos_start[0]-j][self.pos_start[1]] != '--': 
+                        return
+                    j = j + 1
+            elif self.pos_start[0] < self.pos_final[0]:           # the movement is from right to left
+                while self.pos_start[0]+j != self.pos_final[0]:
+                    if self.board[self.pos_start[0]+j][self.pos_start[1]] != '--': 
+                        return
+                    j = j + 1
+                    
+            self.modifyPosition()
+                    
+        # check if final position is correct for the queen (movement like a bishop)    
+        pos_diff = self.getPositionDifference()          
+        
+        if pos_diff[0] == pos_diff[1]: # allow the movement only if the of pos_diff x and y is equal  
+            
+            print("movement like a bishop")
+            
+            # check if there is a piece in the middle
+            i = 1
+            if self.pos_start[0] < self.pos_final[0] and self.pos_start[1] > self.pos_final[1]:     # the movement is to right-top
+                while self.pos_start[0]+i != self.pos_final[0]:
+                    if self.board[self.pos_start[0]+i][self.pos_start[1]-i] != '--': 
+                        return
+                    i = i + 1
+            elif self.pos_start[0] < self.pos_final[0] and self.pos_start[1] < self.pos_final[1]:   # the movement is to right-down
+                while self.pos_start[1]+i != self.pos_final[1]:
+                    if self.board[self.pos_start[0]+i][self.pos_start[1]+i] != '--': 
+                        return
+                    i = i + 1
+            elif self.pos_start[0] > self.pos_final[0] and self.pos_start[1] > self.pos_final[1]:   # the movement is to left-top
+                while self.pos_start[0]-i != self.pos_final[0]:
+                    if self.board[self.pos_start[0]-i][self.pos_start[1]-i] != '--': 
+                        return
+                    i = i + 1
+            elif self.pos_start[0] > self.pos_final[0] and self.pos_start[1] < self.pos_final[1]:   # the movement is to left-down
+                while self.pos_start[0]-i != self.pos_final[0]:
+                    if self.board[self.pos_start[0]-i][self.pos_start[1]+i] != '--': 
+                        return
+                    i = i + 1
+    
+            self.modifyPosition() 
     
     
     def kingMove(self):
@@ -268,7 +329,7 @@ class Move():
     def isFinished(self):
         if self.finished: MessageBox(self.board)
         else: return
-        
+
     
     def setPlayerClicks(self, playerClicks):
         self.pos_start = playerClicks[0]

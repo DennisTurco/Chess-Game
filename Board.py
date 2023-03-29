@@ -19,6 +19,7 @@ class Board():
             ["bB", "bp", "--", "--", "--", "--", "wp", "wB"],
             ["bN", "bp", "--", "--", "--", "--", "wp", "wN"],
             ["bR", "bp", "--", "--", "--", "--", "wp", "wR"],]
+        
 
 # -----------------------------------------------------------------
 
@@ -44,15 +45,30 @@ class Move():
         self.pos_final = playerClicks[1]
         self.board = board
         self.whiteMove = True
-        self.finished = False    
+        self.finished = False
+        self.possibleMovements = [[],[]]
+        self.initPossiblePositions()
         
         try:
             self.sound_move = simpleaudio.WaveObject.from_wave_file("sounds/move.wav")
             self.sound_capture = simpleaudio.WaveObject.from_wave_file("sounds/capture.wav")
         except:
-            logging.error(sys.argv[0] + " -> error on loading sounds")
+            logging.error(sys.argv[0] + " -> error on loading sounds")        
 
-
+    def initPossiblePositions(self):
+        # create a matrix 8 x 8 full with '0'
+        self.possibleMovements = [[0 for x in range(len(self.board))] for y in range(len(self.board))]    
+    
+    def getPossiblePositions(self):
+        return self.possibleMovements
+    
+    def isWhitePiece(self, x, y):
+        piece_name = self.board[x][y]
+        return piece_name[0] == 'w'
+    
+    def isPlayerWhiteTurn(self):
+        return self.whiteMove
+    
     def modifyPosition(self):
         # check if it is a simple move or someone is capturing a piece to play the correct sound
         if self.getTargetPieceName() == '--':
@@ -62,9 +78,11 @@ class Move():
             try: self.sound_capture.play()
             except: logging.error(sys.argv[0] + " -> error on playing sound")
             
+        self.initPossiblePositions()
+            
         self.board[self.pos_final[0]][self.pos_final[1]] = self.getCurrentPieceName()
         self.board[self.pos_start[0]][self.pos_start[1]] = '--'
-        
+            
         if self.whiteMove == True: 
             self.whiteMove = False
         else:
@@ -85,13 +103,43 @@ class Move():
             self.moveRequest(playerClicks) 
             self.finished = self.isFinished()  
         
-
+    def checkPossibleMovements(self, posxy):
+        
+        self.initPossiblePositions()
+        
+        piece_name = self.getCurrentPieceName2(posxy[0], posxy[1])
+        
+        if piece_name[1] == 'p':
+            # white turn
+            if self.whiteMove:
+                # movement 
+                if self.board[posxy[0]][posxy[1]-1] == '--': self.possibleMovements[posxy[0]][posxy[1]-1] = 1
+                if posxy[1] == 6: self.possibleMovements[posxy[0]][posxy[1]-2] = 1
+                # capture
+                if piece_name[0] == 'w':   
+                    if posxy[0] != len(self.board)-1 and posxy[1] != len(self.board)-1: # i need this check for avoid "list index out of range" 
+                        if (self.board[posxy[0]-1][posxy[1]-1] != self.isWhitePiece(posxy[0]-1, posxy[1]-1)) and (self.getPossibleTargetPieceName(posxy[0]-1, posxy[1]-1) != '--'): self.possibleMovements[posxy[0]-1][posxy[1]-1] = 2
+                        if (self.board[posxy[0]+1][posxy[1]-1] != self.isWhitePiece(posxy[0]+1, posxy[1]-1)) and (self.getPossibleTargetPieceName(posxy[0]+1, posxy[1]-1) != '--'): self.possibleMovements[posxy[0]+1][posxy[1]-1] = 2
+                
+            # black turn
+            else:
+                # movement 
+                if self.board[posxy[0]][posxy[1]+1] == '--': self.possibleMovements[posxy[0]][posxy[1]+1] = 1
+                if posxy[1] == 1: self.possibleMovements[posxy[0]][posxy[1]+2] = 1
+                # capture
+                if piece_name[0] == 'b':  
+                    if posxy[0] != len(self.board)-1 and posxy[1] != len(self.board)-1:  # i need this check for avoid "list index out of range"    
+                        if (self.board[posxy[0]+1][posxy[1]+1] == self.isWhitePiece(posxy[0]+1, posxy[1]+1)) and (self.getPossibleTargetPieceName(posxy[0]+1, posxy[1]+1) != '--'): self.possibleMovements[posxy[0]+1][posxy[1]+1] = 2
+                        if (self.board[posxy[0]-1][posxy[1]+1] == self.isWhitePiece(posxy[0]-1, posxy[1]+1)) and (self.getPossibleTargetPieceName(posxy[0]-1, posxy[1]+1) != '--'): self.possibleMovements[posxy[0]-1][posxy[1]+1] = 2
+            
+            
+    
     def moveRequest(self, playerClicks):
         if self.finished: return
         
         # set pos_start and pos_final
         self.setPlayerClicks(playerClicks)
-        
+    
         piece_name = self.getCurrentPieceName()
         
         # errors check
@@ -129,25 +177,24 @@ class Move():
         else:
             logging.error(sys.argv[0] + " -> piece: '" + piece_name + "' doesn't exist")
             return
-      
-            
+    
     def pawnMove(self):        
         # white turn
         if self.whiteMove: 
-            # move down to top           
-            if ((self.pos_start[1] == self.pos_final[1]+1 and self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]+2 and self.pos_start[0] == self.pos_final[0] and self.pos_final[1] == 4)) and self.getTargetPieceName() == '--':                
+            # check if it is a correct movement          
+            if self.possibleMovements[self.pos_final[0]][self.pos_final[1]] == 1:                
                 self.modifyPosition()
             # capture
-            elif ((self.pos_start[0]-1 == self.pos_final[0] and self.pos_start[1]-1 == self.pos_final[1]) or (self.pos_start[0]+1 == self.pos_final[0] and self.pos_start[1]-1 == self.pos_final[1])) and self.getTargetPieceName() != '--':
+            elif self.possibleMovements[self.pos_final[0]][self.pos_final[1]] == 2:
                 self.modifyPosition()
             else: return
         # black turn
         else:
-            # move top to down
-            if ((self.pos_start[1] == self.pos_final[1]-1 and self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]-2 and self.pos_start[0] == self.pos_final[0] and self.pos_final[1] == 3)) and self.getTargetPieceName() == '--':
+            # check if it is a correct movement 
+            if self.possibleMovements[self.pos_final[0]][self.pos_final[1]] == 1:
                 self.modifyPosition()
             # capture
-            elif ((self.pos_start[0]+1 == self.pos_final[0] and self.pos_start[1]+1 == self.pos_final[1]) or (self.pos_start[0]-1 == self.pos_final[0] and self.pos_start[1]+1 == self.pos_final[1])) and self.getTargetPieceName() != '--':
+            elif self.possibleMovements[self.pos_final[0]][self.pos_final[1]] == 2:
                 self.modifyPosition()
             else: return
     
@@ -230,9 +277,7 @@ class Move():
         
         # check if final position is correct the queen (movement like the rock)     
         if (self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]):
-            
-            print("movement like the rock")
-            
+                        
             i = j = 1
             
             # check if there is a piece in the middle
@@ -263,9 +308,7 @@ class Move():
         pos_diff = self.getPositionDifference()          
         
         if pos_diff[0] == pos_diff[1]: # allow the movement only if the of pos_diff x and y is equal  
-            
-            print("movement like a bishop")
-            
+                        
             # check if there is a piece in the middle
             i = 1
             if self.pos_start[0] < self.pos_final[0] and self.pos_start[1] > self.pos_final[1]:     # the movement is to right-top
@@ -299,13 +342,21 @@ class Move():
         if (pos_diff[0] == 1 or pos_diff[0] == 0 or pos_diff[0] == -1) and (pos_diff[1] == 1 or pos_diff[1] == 0 or pos_diff[1] == -1): # allow the movement only if the pos_diff x and y is <= 1
             self.modifyPosition()
         
-     
+    
     def getCurrentPieceName(self):
         return self.board[self.pos_start[0]][self.pos_start[1]]
+    
+    # FIXME: why overloading is not possible?? python is shit (i want java.....)
+    def getCurrentPieceName2(self, posx, posy):
+        return self.board[posx][posy]
 
 
     def getTargetPieceName(self):
         return self.board[self.pos_final[0]][self.pos_final[1]]
+    
+    
+    def getPossibleTargetPieceName(self, posx, posy):
+        return self.board[posx][posy]
     
     
     def getPositionDifference(self):

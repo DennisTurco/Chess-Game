@@ -35,11 +35,13 @@ def main():
       
     board = Board.Board()
     move = Board.Move(playerClicks, board.board)
+    possiblePositions = move.getPossiblePositions()                
+    
     
     loadImages()
     running = True
     
-    while running == True:
+    while running:
         for event in pygame.event.get():
             
             # check for Quit
@@ -54,8 +56,10 @@ def main():
                 # check if is a piece
                 if board.board[posxy[0]][posxy[1]] != '--':
                     
-                    if playerClicks[0] == []:
+                    if playerClicks[0] == [] or (move.isPlayerWhiteTurn() and move.isWhitePiece(posxy[0], posxy[1])) or (not move.isPlayerWhiteTurn() and not move.isWhitePiece(posxy[0], posxy[1])):
                         playerClicks[0] = posxy
+                        move.checkPossibleMovements(posxy)
+                        possiblePositions = move.getPossiblePositions()                
                     
                     elif playerClicks[0] == posxy:
                         playerClicks[0] = []
@@ -71,18 +75,24 @@ def main():
                     playerClicks[1] = posxy
                     move.moveRequest(playerClicks)
                     print(playerClicks)
-                    playerClicks = [[], []]               
+                    playerClicks = [[], []]
+                    move.initPossiblePositions()               
 
             # draw
-            drawGameState(screen, board.board)
+            drawGameState(screen, board.board, possiblePositions)
             pygame.display.flip()
 
 
-def drawGameState(screen, board):
+def drawGameState(screen, board, possiblePositins):
     # draw squares on the board
-    drawBoard(screen) 
+    drawBoard(screen)   
+    
     # draw pieces on the board
     drawPieces(screen, board)
+    
+    # draw Highlight
+    drawHighlight(screen, possiblePositins)  
+    
 
 def drawBoard(screen):
     colors = [pygame.Color('white'), pygame.Color('gray')]
@@ -93,6 +103,21 @@ def drawBoard(screen):
             else:
                 color = colors[1] 
             pygame.draw.rect(screen, color, pygame.Rect(i*SQ_SIZE, j*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+
+
+def drawHighlight(screen, possiblePositins):
+    image_dot = "images/black_dot.png"
+    image_dot = pygame.transform.scale(pygame.image.load(image_dot), (SQ_SIZE, SQ_SIZE))
+    
+    image_circle = "images/black_circle.png"
+    image_circle = pygame.transform.scale(pygame.image.load(image_circle), (SQ_SIZE, SQ_SIZE))
+    
+    for i in range(DIMENSION):
+        for j in range(DIMENSION): 
+            if possiblePositins[i][j] == 1:      
+                screen.blit(image_dot, pygame.Rect(i*SQ_SIZE, j*SQ_SIZE, SQ_SIZE, SQ_SIZE))
+            elif possiblePositins[i][j] == 2:
+                screen.blit(image_circle, pygame.Rect(i*SQ_SIZE, j*SQ_SIZE, SQ_SIZE, SQ_SIZE))
 
 def drawPieces(screen, board):
     for i in range(DIMENSION):

@@ -109,28 +109,73 @@ class Move():
         
         piece_name = self.getCurrentPieceName2(posxy[0], posxy[1])
         
+        if piece_name[0] == 'w' and not self.whiteMove: return
+        if piece_name[0] == 'b' and self.whiteMove: return
+        
         if piece_name[1] == 'p':
             # white turn
             if self.whiteMove:
                 # movement 
                 if self.board[posxy[0]][posxy[1]-1] == '--': self.possibleMovements[posxy[0]][posxy[1]-1] = 1
-                if posxy[1] == 6: self.possibleMovements[posxy[0]][posxy[1]-2] = 1
+                if posxy[1] == 6 and self.board[posxy[0]][posxy[1]-1] == '--': self.possibleMovements[posxy[0]][posxy[1]-2] = 1
                 # capture
                 if piece_name[0] == 'w':   
                     if posxy[0] != len(self.board)-1 and posxy[1] != len(self.board)-1: # i need this check for avoid "list index out of range" 
-                        if (self.board[posxy[0]-1][posxy[1]-1] != self.isWhitePiece(posxy[0]-1, posxy[1]-1)) and (self.getPossibleTargetPieceName(posxy[0]-1, posxy[1]-1) != '--'): self.possibleMovements[posxy[0]-1][posxy[1]-1] = 2
-                        if (self.board[posxy[0]+1][posxy[1]-1] != self.isWhitePiece(posxy[0]+1, posxy[1]-1)) and (self.getPossibleTargetPieceName(posxy[0]+1, posxy[1]-1) != '--'): self.possibleMovements[posxy[0]+1][posxy[1]-1] = 2
-                
+                        if (not self.isWhitePiece(posxy[0]-1, posxy[1]-1)) and (self.getPossibleTargetPieceName(posxy[0]-1, posxy[1]-1) != '--'): 
+                            self.possibleMovements[posxy[0]-1][posxy[1]-1] = 2
+                        if (not self.isWhitePiece(posxy[0]+1, posxy[1]-1)) and (self.getPossibleTargetPieceName(posxy[0]+1, posxy[1]-1) != '--'): 
+                            self.possibleMovements[posxy[0]+1][posxy[1]-1] = 2
+                        
             # black turn
             else:
                 # movement 
                 if self.board[posxy[0]][posxy[1]+1] == '--': self.possibleMovements[posxy[0]][posxy[1]+1] = 1
-                if posxy[1] == 1: self.possibleMovements[posxy[0]][posxy[1]+2] = 1
+                if posxy[1] == 1 and self.board[posxy[0]][posxy[1]+1] == '--': self.possibleMovements[posxy[0]][posxy[1]+2] = 1
                 # capture
                 if piece_name[0] == 'b':  
-                    if posxy[0] != len(self.board)-1 and posxy[1] != len(self.board)-1:  # i need this check for avoid "list index out of range"    
-                        if (self.board[posxy[0]+1][posxy[1]+1] == self.isWhitePiece(posxy[0]+1, posxy[1]+1)) and (self.getPossibleTargetPieceName(posxy[0]+1, posxy[1]+1) != '--'): self.possibleMovements[posxy[0]+1][posxy[1]+1] = 2
-                        if (self.board[posxy[0]-1][posxy[1]+1] == self.isWhitePiece(posxy[0]-1, posxy[1]+1)) and (self.getPossibleTargetPieceName(posxy[0]-1, posxy[1]+1) != '--'): self.possibleMovements[posxy[0]-1][posxy[1]+1] = 2
+                    if posxy[0] != len(self.board)-1 and posxy[1] != len(self.board)-1:  # i need this check for avoid "list index out of range" 
+                        if (self.isWhitePiece(posxy[0]+1, posxy[1]+1)) and (self.getPossibleTargetPieceName(posxy[0]+1, posxy[1]+1) != '--'): 
+                            self.possibleMovements[posxy[0]+1][posxy[1]+1] = 2
+                        if (self.isWhitePiece(posxy[0]-1, posxy[1]+1)) and (self.getPossibleTargetPieceName(posxy[0]-1, posxy[1]+1) != '--'):  
+                            self.possibleMovements[posxy[0]-1][posxy[1]+1] = 2
+                                
+        elif piece_name[1] == 'R':
+            # check if there is a piece in the middle
+            i = 1
+            while posxy[1]-i != len(self.board):    # the movement is from top to down
+                if self.board[posxy[0]][posxy[1]-i] != '--': 
+                    if (self.isWhitePiece(posxy[0], posxy[1]-i) and not self.whiteMove) or (not self.isWhitePiece(posxy[0], posxy[1]-i) and self.whiteMove): # check if there is a possible capture
+                        self.possibleMovements[posxy[0]][posxy[1]-i] = 2
+                    break
+                self.possibleMovements[posxy[0]][posxy[1]-i] = 1
+                i = i + 1
+            i = 1
+            while posxy[1]+i != len(self.board):    # the movement is from down to top
+                if self.board[posxy[0]][posxy[1]+i] != '--': 
+                    if (self.isWhitePiece(posxy[0], posxy[1]+i) and not self.whiteMove) or (not self.isWhitePiece(posxy[0], posxy[1]+i) and self.whiteMove): # check if there is a possible capture
+                        self.possibleMovements[posxy[0]][posxy[1]+i] = 2
+                    break
+                self.possibleMovements[posxy[0]][posxy[1]+i] = 1
+                i = i + 1
+            i = 1
+            while posxy[0]-i != len(self.board):    # the movement is from right to left
+                if self.board[posxy[0]-i][posxy[1]] != '--': 
+                    if (self.isWhitePiece(posxy[0]-i, posxy[1]) and not self.whiteMove) or (not self.isWhitePiece(posxy[0]-i, posxy[1]) and self.whiteMove): # check if there is a possible capture
+                        self.possibleMovements[posxy[0]-i][posxy[1]] = 2
+                    break
+                self.possibleMovements[posxy[0]-i][posxy[1]] = 1
+                i = i + 1
+            i = 1
+            while posxy[0]+i != len(self.board):    # the movement is from right to left
+                if self.board[posxy[0]+i][posxy[1]] != '--': 
+                    if (self.isWhitePiece(posxy[0]+i, posxy[1]) and not self.whiteMove) or (not self.isWhitePiece(posxy[0]+i, posxy[1]) and self.whiteMove): # check if there is a possible capture
+                        self.possibleMovements[posxy[0]+i][posxy[1]] = 2
+                    break
+                self.possibleMovements[posxy[0]+i][posxy[1]] = 1
+                i = i + 1
+                    
+                    
+        self.printMatrix()
             
             
     
@@ -179,57 +224,16 @@ class Move():
             return
     
     def pawnMove(self):        
-        # white turn
-        if self.whiteMove: 
-            # check if it is a correct movement          
-            if self.possibleMovements[self.pos_final[0]][self.pos_final[1]] == 1:                
-                self.modifyPosition()
-            # capture
-            elif self.possibleMovements[self.pos_final[0]][self.pos_final[1]] == 2:
-                self.modifyPosition()
-            else: return
-        # black turn
-        else:
-            # check if it is a correct movement 
-            if self.possibleMovements[self.pos_final[0]][self.pos_final[1]] == 1:
-                self.modifyPosition()
-            # capture
-            elif self.possibleMovements[self.pos_final[0]][self.pos_final[1]] == 2:
-                self.modifyPosition()
-            else: return
+        # check if it is a correct movement or a capture (if the result is: 1 -> movement; 2 -> capture)
+        if self.possibleMovements[self.pos_final[0]][self.pos_final[1]] != 0:
+            self.modifyPosition()
+        else: return
     
     
     def rockMove(self):
-        # check if final position is correct for rock        
-        if (self.pos_start[0] == self.pos_final[0]) or (self.pos_start[1] == self.pos_final[1]):
-            
-            i = j = 1
-            
-            # check if there is a piece in the middle
-            if self.pos_start[1] > self.pos_final[1]:             # the movement is from top to down
-                while self.pos_start[1]-i != self.pos_final[1]:
-                    if self.board[self.pos_start[0]][self.pos_start[1]-i] != '--': 
-                        return
-                    i = i + 1
-            elif self.pos_start[1] < self.pos_final[1]:           # the movement is from down to top
-                while self.pos_start[1]+i != self.pos_final[1]:
-                    if self.board[self.pos_start[0]][self.pos_start[1]+i] != '--': 
-                        return
-                    i = i + 1
-            elif self.pos_start[0] > self.pos_final[0]:           # the movement is from right to left
-                while self.pos_start[0]-j != self.pos_final[0]:
-                    if self.board[self.pos_start[0]-j][self.pos_start[1]] != '--': 
-                        return
-                    j = j + 1
-            elif self.pos_start[0] < self.pos_final[0]:           # the movement is from right to left
-                while self.pos_start[0]+j != self.pos_final[0]:
-                    if self.board[self.pos_start[0]+j][self.pos_start[1]] != '--': 
-                        return
-                    j = j + 1
-            
-            # let the movement
+        # check if it is a correct movement or a capture (if the result is: 1 -> movement; 2 -> capture)        
+        if self.possibleMovements[self.pos_final[0]][self.pos_final[1]] != 0:
             self.modifyPosition()
-        
         else: return
       
         
@@ -346,7 +350,7 @@ class Move():
     def getCurrentPieceName(self):
         return self.board[self.pos_start[0]][self.pos_start[1]]
     
-    # FIXME: why overloading is not possible?? python is shit (i want java.....)
+    # FIXME: why is not possible overloading?? python is shit (i want java.....)
     def getCurrentPieceName2(self, posx, posy):
         return self.board[posx][posy]
 
@@ -375,6 +379,11 @@ class Move():
             pos_diff[1] =  self.pos_start[1] - self.pos_final[1]
         
         return pos_diff
+
+    
+    def printMatrix(self):
+        for i in range(len(self.possibleMovements)):
+            print(self.possibleMovements[i])
     
     
     def isFinished(self):

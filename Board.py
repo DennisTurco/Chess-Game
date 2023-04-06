@@ -25,7 +25,7 @@ class Board():
 
 class MessageBox():
     
-    def __init__(self, board):
+    def __init__(self):
         self.whiteWin = "White has won the game!"
         self.blackWin = "Black has won the game!"
         self.titleMessage = "Good Job"
@@ -88,6 +88,7 @@ class Move():
         else:
             self.whiteMove = True
         
+        self.printMatrix(self.board)     
     
     def captureRequest(self, playerClicks):        
         if self.finished: return
@@ -101,7 +102,7 @@ class Move():
             return
         else:
             self.moveRequest(playerClicks) 
-            self.finished = self.isFinished()  
+            self.isCheckMate()  
         
     def checkPossibleMovements(self, posxy):
         
@@ -130,9 +131,7 @@ class Move():
             
         elif piece_name[1] == 'K':
             self.kingPossiblesMove(posxy)
-            
-            
-    
+                  
     def moveRequest(self, playerClicks):
         if self.finished: return
         
@@ -177,13 +176,12 @@ class Move():
             logging.error(sys.argv[0] + " -> piece: '" + piece_name + "' doesn't exist")
             return
         
-    
     def pawnPossiblesMove(self, posxy, piece_name):
          # white turn
             if self.whiteMove:
                 # movement 
                 if self.board[posxy[0]][posxy[1]-1] == '--': self.possibleMovements[posxy[0]][posxy[1]-1] = 1
-                if posxy[1] == 6 and self.board[posxy[0]][posxy[1]-1] == '--': self.possibleMovements[posxy[0]][posxy[1]-2] = 1
+                if posxy[1] == 6 and self.board[posxy[0]][posxy[1]-2] == '--': self.possibleMovements[posxy[0]][posxy[1]-2] = 1
                 # capture
                 if piece_name[0] == 'w':   
                     if posxy[0] != len(self.board)-1 and posxy[1] != len(self.board)-1: # i need this check for avoid "list index out of range" 
@@ -196,7 +194,7 @@ class Move():
             else:
                 # movement 
                 if self.board[posxy[0]][posxy[1]+1] == '--': self.possibleMovements[posxy[0]][posxy[1]+1] = 1
-                if posxy[1] == 1 and self.board[posxy[0]][posxy[1]+1] == '--': self.possibleMovements[posxy[0]][posxy[1]+2] = 1
+                if posxy[1] == 1 and self.board[posxy[0]][posxy[1]+2] == '--': self.possibleMovements[posxy[0]][posxy[1]+2] = 1
                 # capture
                 if piece_name[0] == 'b':  
                     if posxy[0] != len(self.board)-1 and posxy[1] != len(self.board)-1:  # i need this check for avoid "list index out of range" 
@@ -243,38 +241,39 @@ class Move():
     def bishopPossiblesMove(self, posxy):
         # check if there is a piece in the middle
         i = 1
-        while posxy[1]-i != len(self.board):    # the movement is from top to down
-            if self.board[posxy[0]][posxy[1]-i] != '--': 
-                if (self.isWhitePiece(posxy[0], posxy[1]-i) and not self.whiteMove) or (not self.isWhitePiece(posxy[0], posxy[1]-i) and self.whiteMove): # check if there is a possible capture
-                    self.possibleMovements[posxy[0]][posxy[1]-i] = 2
+        while posxy[0]-i >= 0 and posxy[1]-i >= 0:    # the movement is from bottom to top-left
+            if self.board[posxy[0]-i][posxy[1]-i] != '--': 
+                if (self.isWhitePiece(posxy[0]-i, posxy[1]-i) and not self.whiteMove) or (not self.isWhitePiece(posxy[0]-i, posxy[1]-i) and self.whiteMove): # check if there is a possible capture
+                    self.possibleMovements[posxy[0]-i][posxy[1]-i] = 2
                 break
-            self.possibleMovements[posxy[0]][posxy[1]-i] = 1
+            self.possibleMovements[posxy[0]-i][posxy[1]-i] = 1
             i = i + 1
         i = 1
-        while posxy[1]+i != len(self.board):    # the movement is from down to top
-            if self.board[posxy[0]][posxy[1]+i] != '--': 
-                if (self.isWhitePiece(posxy[0], posxy[1]+i) and not self.whiteMove) or (not self.isWhitePiece(posxy[0], posxy[1]+i) and self.whiteMove): # check if there is a possible capture
-                    self.possibleMovements[posxy[0]][posxy[1]+i] = 2
+        while posxy[0]+i <= len(self.board)-1 and posxy[1]+i <= len(self.board)-1:    # the movement is from top to bottom-right
+            if self.board[posxy[0]+i][posxy[1]+i] != '--': 
+                if (self.isWhitePiece(posxy[0]+i, posxy[1]+i) and not self.whiteMove) or (not self.isWhitePiece(posxy[0]+i, posxy[1]+i) and self.whiteMove): # check if there is a possible capture
+                    self.possibleMovements[posxy[0]+i][posxy[1]+i] = 2
                 break
-            self.possibleMovements[posxy[0]][posxy[1]+i] = 1
+            self.possibleMovements[posxy[0]+i][posxy[1]+i] = 1
+            i = i + 1
+        i = 1   
+        while posxy[0]-i >= 0 and posxy[1]+i <= len(self.board)-1:    # the movement is from top to bommon-left
+            if self.board[posxy[0]-i][posxy[1]+i] != '--': 
+                if (self.isWhitePiece(posxy[0]-i, posxy[1]+i) and not self.whiteMove) or (not self.isWhitePiece(posxy[0]-i, posxy[1]+i) and self.whiteMove): # check if there is a possible capture
+                    self.possibleMovements[posxy[0]-i][posxy[1]+i] = 2
+                break
+            self.possibleMovements[posxy[0]-i][posxy[1]+i] = 1
             i = i + 1
         i = 1
-        while posxy[0]-i != len(self.board):    # the movement is from right to left
-            if self.board[posxy[0]-i][posxy[1]] != '--': 
-                if (self.isWhitePiece(posxy[0]-i, posxy[1]) and not self.whiteMove) or (not self.isWhitePiece(posxy[0]-i, posxy[1]) and self.whiteMove): # check if there is a possible capture
-                    self.possibleMovements[posxy[0]-i][posxy[1]] = 2
+        while posxy[0]+i <= len(self.board)-1 and posxy[1]-i >= 0:    # the movement is from bottom to top-right
+            if self.board[posxy[0]+i][posxy[1]-i] != '--': 
+                if (self.isWhitePiece(posxy[0]+i, posxy[1]-i) and not self.whiteMove) or (not self.isWhitePiece(posxy[0]+i, posxy[1]-i) and self.whiteMove): # check if there is a possible capture
+                    self.possibleMovements[posxy[0]+i][posxy[1]-i] = 2
                 break
-            self.possibleMovements[posxy[0]-i][posxy[1]] = 1
+            self.possibleMovements[posxy[0]+i][posxy[1]-i] = 1
             i = i + 1
         i = 1
-        while posxy[0]+i != len(self.board):    # the movement is from right to left
-            if self.board[posxy[0]+i][posxy[1]] != '--': 
-                if (self.isWhitePiece(posxy[0]+i, posxy[1]) and not self.whiteMove) or (not self.isWhitePiece(posxy[0]+i, posxy[1]) and self.whiteMove): # check if there is a possible capture
-                    self.possibleMovements[posxy[0]+i][posxy[1]] = 2
-                break
-            self.possibleMovements[posxy[0]+i][posxy[1]] = 1
-            i = i + 1
-            
+                  
     def knightPossiblesMove(self, posxy):
         # check if final position is correct for the night              
         if posxy[0]-1 >= 0 and posxy[1]-2 >= 0:                     # i need this check for avoid "list index out of range"    
@@ -445,14 +444,29 @@ class Move():
         return pos_diff
 
     
-    def printMatrix(self):
-        for i in range(len(self.possibleMovements)):
-            print(self.possibleMovements[i])
+    def printMatrix(self, matrix):
+        for i in range(len(matrix)):
+            print(matrix[i])
     
     
     def isFinished(self):
-        if self.finished: MessageBox(self.board)
-        else: return
+        return self.finished
+        
+    def isCheckMate(self):
+        # check possible check mate, i'm serching king piece. assign to true if they are on the board
+        blackKing = False
+        whiteKing = False
+        for i in range(len(self.board)):
+            for j in range(len(self.board)):
+                piece_name = self.getCurrentPieceName2(i, j)
+                if piece_name == 'bK': blackKing = True
+                elif piece_name == 'wK': whiteKing = True
+        
+        if not blackKing or not whiteKing:
+            self.finished = True
+            messageBox = MessageBox()
+            if not whiteKing: messageBox.setWinner(False) # white is winner
+            else: messageBox.setWinner(True) # black is winner
 
     
     def setPlayerClicks(self, playerClicks):

@@ -8,7 +8,6 @@ WIDTH = 512
 HEIGHT = 512    
 DIMENSION = 8   # dimension for chess board is 8x8
 SQ_SIZE = HEIGHT // DIMENSION   # square size
-MAX_FPS = 15    # for animations
 IMAGES = {}
 
 def loadImages():
@@ -42,7 +41,7 @@ def main():
     running = True
     
     while running:
-        for event in pygame.event.get():
+        for event in pygame.event.get():  
             
             # check for Quit
             if event.type == pygame.QUIT:
@@ -52,13 +51,13 @@ def main():
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
                 posxy = [pos[0] // SQ_SIZE, pos[1] // SQ_SIZE]  # i want to se the board like a matrix
-            
+                            
                 # check if is a piece
                 if board.board[posxy[0]][posxy[1]] != '--':
                     
                     if playerClicks[0] == [] or (move.isPlayerWhiteTurn() and move.isWhitePiece(posxy[0], posxy[1])) or (not move.isPlayerWhiteTurn() and not move.isWhitePiece(posxy[0], posxy[1])):
                         playerClicks[0] = posxy
-                        move.checkPossibleMovements(posxy)
+                        move.setPossibleMovements(posxy)
                         possiblePositions = move.getPossiblePositions()                
                     
                     elif playerClicks[0] == posxy:
@@ -69,6 +68,8 @@ def main():
                         playerClicks[1] = posxy
                         move.captureRequest(playerClicks)
                         playerClicks = [[], []]
+                        # reset possiblePositions
+                        possiblePositions = move.getPossiblePositions() 
 
                 # check if first position is selected and the second not
                 elif playerClicks[0] != [] and playerClicks[1] == []:   
@@ -76,23 +77,23 @@ def main():
                     move.moveRequest(playerClicks)
                     print(playerClicks)
                     playerClicks = [[], []]
-                    move.initPossiblePositions()               
+                    # reset possiblePositions
+                    possiblePositions = move.getPossiblePositions() 
 
             # draw
             drawGameState(screen, board.board, possiblePositions)
             pygame.display.flip()
 
 
-def drawGameState(screen, board, possiblePositins):
+def drawGameState(screen, board, possiblePositions):
     # draw squares on the board
     drawBoard(screen)   
     
-    # draw pieces on the board
-    drawPieces(screen, board)
-    
     # draw Highlight
-    drawHighlight(screen, possiblePositins)  
+    drawHighlight(screen, possiblePositions)
     
+    # draw pieces on the board
+    drawPieces(screen, board) 
 
 def drawBoard(screen):
     colors = [pygame.Color('white'), pygame.Color('gray')]

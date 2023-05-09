@@ -56,6 +56,8 @@ class Move():
         self.__board = board
         self.__whiteMove = True
         self.__finished = False
+        self.__blackKingCastling = True
+        self.__whiteKingCastling = True
         self.__possibleMovements = [[],[]]
         
         self.__initPossiblePositions()
@@ -189,178 +191,74 @@ class Move():
                             self.__possibleMovements[posxy[0]+1][posxy[1]+1] = 2
                         if (self.isWhitePiece(posxy[0]-1, posxy[1]+1)) and (self.getPossibleTargetPieceName(posxy[0]-1, posxy[1]+1) != '--'):  
                             self.__possibleMovements[posxy[0]-1][posxy[1]+1] = 2
+                             
+    def __rockPossiblesMove(self, posxy): 
+        self.__rockAndBishopPossiblesMoveAlgorithm(posxy, 0, +1)     # the movement is from top to down     
+        self.__rockAndBishopPossiblesMoveAlgorithm(posxy, 0, -1)     # the movement is from down to top
+        self.__rockAndBishopPossiblesMoveAlgorithm(posxy, -1, 0)     # the movement is from right to left
+        self.__rockAndBishopPossiblesMoveAlgorithm(posxy, +1, 0)     # the movement is from left to right
     
-    #FIXME: fix black rock move                         
-    def __rockPossiblesMove(self, posxy):
-        # check if there is a piece in the middle
-        i = 1
-        while posxy[1]-i != len(self.__board):    # the movement is from top to down
-            if self.__board[posxy[0]][posxy[1]-i] != '--': 
-                if (self.isWhitePiece(posxy[0], posxy[1]-i) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0], posxy[1]-i) and self.__whiteMove): # check if there is a possible capture
-                    self.__possibleMovements[posxy[0]][posxy[1]-i] = 2
-                break
-            self.__possibleMovements[posxy[0]][posxy[1]-i] = 1
-            i = i + 1
-        i = 1
-        while posxy[1]+i != len(self.__board):    # the movement is from down to top
-            if self.__board[posxy[0]][posxy[1]+i] != '--': 
-                if (self.isWhitePiece(posxy[0], posxy[1]+i) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0], posxy[1]+i) and self.__whiteMove): # check if there is a possible capture
-                    self.__possibleMovements[posxy[0]][posxy[1]+i] = 2
-                break
-            self.__possibleMovements[posxy[0]][posxy[1]+i] = 1
-            i = i + 1
-        i = 1
-        while posxy[0]-i != len(self.__board):    # the movement is from right to left
-            if self.__board[posxy[0]-i][posxy[1]] != '--': 
-                if (self.isWhitePiece(posxy[0]-i, posxy[1]) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]-i, posxy[1]) and self.__whiteMove): # check if there is a possible capture
-                    self.__possibleMovements[posxy[0]-i][posxy[1]] = 2
-                break
-            self.__possibleMovements[posxy[0]-i][posxy[1]] = 1
-            i = i + 1
-        i = 1
-        while posxy[0]+i != len(self.__board):    # the movement is from right to left
-            if self.__board[posxy[0]+i][posxy[1]] != '--': 
-                if (self.isWhitePiece(posxy[0]+i, posxy[1]) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]+i, posxy[1]) and self.__whiteMove): # check if there is a possible capture
-                    self.__possibleMovements[posxy[0]+i][posxy[1]] = 2
-                break
-            self.__possibleMovements[posxy[0]+i][posxy[1]] = 1
-            i = i + 1
-                
     def __bishopPossiblesMove(self, posxy):
-        # check if there is a piece in the middle
-        i = 1
-        while posxy[0]-i >= 0 and posxy[1]-i >= 0:    # the movement is from bottom to top-left
-            if self.__board[posxy[0]-i][posxy[1]-i] != '--': 
-                if (self.isWhitePiece(posxy[0]-i, posxy[1]-i) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]-i, posxy[1]-i) and self.__whiteMove): # check if there is a possible capture
-                    self.__possibleMovements[posxy[0]-i][posxy[1]-i] = 2
-                break
-            self.__possibleMovements[posxy[0]-i][posxy[1]-i] = 1
-            i = i + 1
-        i = 1
-        while posxy[0]+i <= len(self.__board)-1 and posxy[1]+i <= len(self.__board)-1:    # the movement is from top to bottom-right
-            if self.__board[posxy[0]+i][posxy[1]+i] != '--': 
-                if (self.isWhitePiece(posxy[0]+i, posxy[1]+i) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]+i, posxy[1]+i) and self.__whiteMove): # check if there is a possible capture
-                    self.__possibleMovements[posxy[0]+i][posxy[1]+i] = 2
-                break
-            self.__possibleMovements[posxy[0]+i][posxy[1]+i] = 1
-            i = i + 1
-        i = 1   
-        while posxy[0]-i >= 0 and posxy[1]+i <= len(self.__board)-1:    # the movement is from top to bommon-left
-            if self.__board[posxy[0]-i][posxy[1]+i] != '--': 
-                if (self.isWhitePiece(posxy[0]-i, posxy[1]+i) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]-i, posxy[1]+i) and self.__whiteMove): # check if there is a possible capture
-                    self.__possibleMovements[posxy[0]-i][posxy[1]+i] = 2
-                break
-            self.__possibleMovements[posxy[0]-i][posxy[1]+i] = 1
-            i = i + 1
-        i = 1
-        while posxy[0]+i <= len(self.__board)-1 and posxy[1]-i >= 0:    # the movement is from bottom to top-right
-            if self.__board[posxy[0]+i][posxy[1]-i] != '--': 
-                if (self.isWhitePiece(posxy[0]+i, posxy[1]-i) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]+i, posxy[1]-i) and self.__whiteMove): # check if there is a possible capture
-                    self.__possibleMovements[posxy[0]+i][posxy[1]-i] = 2
-                break
-            self.__possibleMovements[posxy[0]+i][posxy[1]-i] = 1
-            i = i + 1
-        i = 1
-                  
+        self.__rockAndBishopPossiblesMoveAlgorithm(posxy, -1, -1)      # the movement is from bottom to top-left
+        self.__rockAndBishopPossiblesMoveAlgorithm(posxy, +1, +1)      # the movement is from top to bottom-right
+        self.__rockAndBishopPossiblesMoveAlgorithm(posxy, -1, +1)      # the movement is from top to bommon-left
+        self.__rockAndBishopPossiblesMoveAlgorithm(posxy, +1, -1)      # the movement is from bottom to top-right
+         
     def __knightPossiblesMove(self, posxy):
-        # check if final position is correct for the night              
-        if posxy[0]-1 >= 0 and posxy[1]-2 >= 0:                     # i need this check for avoid "list index out of range"    
-            if self.__board[posxy[0]-1][posxy[1]-2] == '--':
-                self.__possibleMovements[posxy[0]-1][posxy[1]-2] = 1
-            elif self.__board[posxy[0]-1][posxy[1]-2] != '--' and (self.isWhitePiece(posxy[0]-1, posxy[1]-2) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]-1, posxy[1]-2) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]-1][posxy[1]-2] = 2
-                
-        if posxy[0]-1 >= 0 and posxy[1]+2 <= len(self.__board)-1:     # i need this check for avoid "list index out of range"    
-            if self.__board[posxy[0]-1][posxy[1]+2] == '--':
-                self.__possibleMovements[posxy[0]-1][posxy[1]+2] = 1
-            elif self.__board[posxy[0]-1][posxy[1]+2] != '--' and (self.isWhitePiece(posxy[0]-1, posxy[1]+2) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]-1, posxy[1]+2) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]-1][posxy[1]+2] = 2
-                
-        if posxy[0]+1 <= len(self.__board)-1 and posxy[1]+2 <= len(self.__board)-1:     # i need this check for avoid "list index out of range"    
-            if self.__board[posxy[0]+1][posxy[1]+2] == '--':
-                self.__possibleMovements[posxy[0]+1][posxy[1]+2] = 1
-            elif self.__board[posxy[0]+1][posxy[1]+2] != '--' and (self.isWhitePiece(posxy[0]+1, posxy[1]+2) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]+1, posxy[1]+2) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]+1][posxy[1]+2] = 2
-                
-        if posxy[0]+2 <= len(self.__board)-1 and posxy[1]+1 <= len(self.__board)-1:     # i need this check for avoid "list index out of range"    
-            if self.__board[posxy[0]+2][posxy[1]+1] == '--':
-                self.__possibleMovements[posxy[0]+2][posxy[1]+1] = 1
-            elif self.__board[posxy[0]+2][posxy[1]+1] != '--' and (self.isWhitePiece(posxy[0]+2, posxy[1]+1) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]+2, posxy[1]+1) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]+2][posxy[1]+1] = 2
-        
-        if posxy[0]+1 <= len(self.__board)-1 and posxy[1]-2 >= 0:     # i need this check for avoid "list index out of range"    
-            if self.__board[posxy[0]+1][posxy[1]-2] == '--':
-                self.__possibleMovements[posxy[0]+1][posxy[1]-2] = 1
-            elif self.__board[posxy[0]+1][posxy[1]-2] != '--' and (self.isWhitePiece(posxy[0]+1, posxy[1]-2) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]+1, posxy[1]-2) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]+1][posxy[1]-2] = 2
-                
-        if posxy[0]-2 >= 0 and posxy[1]+1 <= len(self.__board)-1:     # i need this check for avoid "list index out of range"    
-            if self.__board[posxy[0]-2][posxy[1]+1] == '--':
-                self.__possibleMovements[posxy[0]-2][posxy[1]+1] = 1
-            elif self.__board[posxy[0]-2][posxy[1]+1] != '--' and (self.isWhitePiece(posxy[0]-2, posxy[1]+1) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]-2, posxy[1]+1) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]-2][posxy[1]+1] = 2     
-        
-        if posxy[0]+2 <= len(self.__board)-1 and posxy[1]-1 >= 0:     # i need this check for avoid "list index out of range"    
-            if self.__board[posxy[0]+2][posxy[1]-1] == '--':
-                self.__possibleMovements[posxy[0]+2][posxy[1]-1] = 1
-            elif self.__board[posxy[0]+2][posxy[1]-1] != '--' and (self.isWhitePiece(posxy[0]+2, posxy[1]-1) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]+2, posxy[1]-1) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]+2][posxy[1]-1] = 2
-                
-        if posxy[0]-2 >= 0 and posxy[1]-1 >= 0:                     # i need this check for avoid "list index out of range"    
-            if self.__board[posxy[0]-2][posxy[1]-1] == '--':
-                self.__possibleMovements[posxy[0]-2][posxy[1]-1] = 1
-            elif self.__board[posxy[0]-2][posxy[1]-1] != '--' and (self.isWhitePiece(posxy[0]-2, posxy[1]-1) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]-2, posxy[1]-1) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]-2][posxy[1]-1] = 2
+        # check if final position is correct for the night 
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, -1, -2) 
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, -1, +2) 
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, +1, +2) 
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, +2, +1) 
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, +1, -2) 
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, -2, +1)
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, +2, -1)
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, -2, -1)       
         
     def __kingPossiblesMove(self, posxy):
-        # check if final position is correct for the king    
-        if posxy[0]-1 >= 0 and posxy[1]-1 >= 0:                     # i need this check for avoid "list index out of range" 
-            if self.__board[posxy[0]-1][posxy[1]-1] == '--':
-                self.__possibleMovements[posxy[0]-1][posxy[1]-1] = 1
-            elif self.__board[posxy[0]-1][posxy[1]-1] != '--' and (self.isWhitePiece(posxy[0]-1, posxy[1]-1) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]-1, posxy[1]-1) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]-1][posxy[1]-1] = 2
+        # check if final position is correct for the king   
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, -1, -1) 
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, -1, +1) 
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, +1, -1) 
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, +1, +1) 
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, +1, 0) 
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, 0, +1)
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, -1, 0)
+        self.__knightAndKingPossiblesMoveAlgorithm(posxy, 0, -1)
         
-        if posxy[0]-1 >= 0 and posxy[1]+1 <= len(self.__board)-1:                     # i need this check for avoid "list index out of range" 
-            if self.__board[posxy[0]-1][posxy[1]+1] == '--':
-                self.__possibleMovements[posxy[0]-1][posxy[1]+1] = 1
-            elif self.__board[posxy[0]-1][posxy[1]+1] != '--' and (self.isWhitePiece(posxy[0]-1, posxy[1]+1) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]-1, posxy[1]+1) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]-1][posxy[1]+1] = 2
-                
-        if posxy[0]+1 <= len(self.__board)-1 and posxy[1]-1 >= 0:                     # i need this check for avoid "list index out of range" 
-            if self.__board[posxy[0]+1][posxy[1]-1] == '--':
-                self.__possibleMovements[posxy[0]+1][posxy[1]-1] = 1
-            elif self.__board[posxy[0]+1][posxy[1]-1] != '--' and (self.isWhitePiece(posxy[0]+1, posxy[1]-1) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]+1, posxy[1]-1) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]+1][posxy[1]-1] = 2
+    
+    def __rockAndBishopPossiblesMoveAlgorithm(self, posxy, incrementer1, incrementer2):
+        i = incrementer1
+        j = incrementer2
         
-        if posxy[0]+1 <= len(self.__board)-1 and posxy[1]+1 <= len(self.__board)-1:     # i need this check for avoid "list index out of range" 
-            if self.__board[posxy[0]+1][posxy[1]+1] == '--':
-                self.__possibleMovements[posxy[0]+1][posxy[1]+1] = 1
-            elif self.__board[posxy[0]+1][posxy[1]+1] != '--' and (self.isWhitePiece(posxy[0]+1, posxy[1]+1) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]+1, posxy[1]+1) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]+1][posxy[1]+1] = 2
+        condition = True
         
-        if posxy[0]+1 <= len(self.__board)-1:         # i need this check for avoid "list index out of range" 
-            if self.__board[posxy[0]+1][posxy[1]] == '--':
-                self.__possibleMovements[posxy[0]+1][posxy[1]] = 1
-            elif self.__board[posxy[0]+1][posxy[1]] != '--' and (self.isWhitePiece(posxy[0]+1, posxy[1]) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]+1, posxy[1]) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]+1][posxy[1]] = 2
-                
-        if posxy[1]+1 <= len(self.__board)-1:         # i need this check for avoid "list index out of range" 
-            if self.__board[posxy[0]][posxy[1]+1] == '--':
-                self.__possibleMovements[posxy[0]][posxy[1]+1] = 1
-            elif self.__board[posxy[0]][posxy[1]+1] != '--' and (self.isWhitePiece(posxy[0], posxy[1]+1) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0], posxy[1]+1) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]][posxy[1]+1] = 2
-                
-        if posxy[0]-1 >= 0:                         # i need this check for avoid "list index out of range" 
-            if self.__board[posxy[0]-1][posxy[1]] == '--':
-                self.__possibleMovements[posxy[0]-1][posxy[1]] = 1
-            elif self.__board[posxy[0]-1][posxy[1]] != '--' and (self.isWhitePiece(posxy[0]-1, posxy[1]) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]-1, posxy[1]) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]-1][posxy[1]] = 2
+        # check if there is a piece in the middle
+        while condition:
+            
+            condition = posxy[0]+i <= len(self.__board)-1 and posxy[1]+j <= len(self.__board)-1 and posxy[0]+i >= 0 and posxy[1]+j >= 0
+            
+            if (not condition): return
+            
+            if self.__board[posxy[0]+i][posxy[1]+j] != '--': 
+                if (self.isWhitePiece(posxy[0]+i, posxy[1]+j) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]+i, posxy[1]+j) and self.__whiteMove): # check if there is a possible capture
+                    self.__possibleMovements[posxy[0]+i][posxy[1]+j] = 2
+                break
+            self.__possibleMovements[posxy[0]+i][posxy[1]+j] = 1
+            i = i + incrementer1
+            j = j + incrementer2
+    
+    def __knightAndKingPossiblesMoveAlgorithm(self, posxy, i, j):
+        condition = posxy[1]+j <= len(self.__board)-1 and posxy[0]+i <= len(self.__board)-1 and posxy[1]+j >= 0 and posxy[0]+i >= 0
         
-        if posxy[1]-1 >= 0:                         # i need this check for avoid "list index out of range" 
-            if self.__board[posxy[0]][posxy[1]-1] == '--':
-                self.__possibleMovements[posxy[0]][posxy[1]-1] = 1
-            elif self.__board[posxy[0]][posxy[1]-1] != '--' and (self.isWhitePiece(posxy[0], posxy[1]-1) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0], posxy[1]-1) and self.__whiteMove): # check if there is a possible capture:
-                self.__possibleMovements[posxy[0]][posxy[1]-1] = 2
+        if (not condition): return
+        
+        if self.__board[posxy[0]+i][posxy[1]+j] == '--':
+            self.__possibleMovements[posxy[0]+i][posxy[1]+j] = 1
+        elif self.__board[posxy[0]+i][posxy[1]+j] != '--' and (self.isWhitePiece(posxy[0]+i, posxy[1]+j) and not self.__whiteMove) or (not self.isWhitePiece(posxy[0]+i, posxy[1]+j) and self.__whiteMove): # check if there is a possible capture:
+            self.__possibleMovements[posxy[0]+i][posxy[1]+j] = 2
+                  
+    
     
     def __pieceMove(self):  
         # check if it is a correct movement or a capture (if the result is: 1 -> movement; 2 -> capture)
@@ -375,19 +273,15 @@ class Move():
     def getCurrentPieceName2(self, posx, posy):
         return self.__board[posx][posy]
 
-
     def getTargetPieceName(self):
         return self.__board[self.__pos_final[0]][self.__pos_final[1]]
     
-    
     def getPossibleTargetPieceName(self, posx, posy):
         return self.__board[posx][posy]
-
     
     def __printMatrix(self, matrix):
         for i in range(len(matrix)):
             print(matrix[i])
-    
     
     def isFinished(self):
         return self.__finished

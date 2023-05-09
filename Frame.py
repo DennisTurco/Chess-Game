@@ -51,6 +51,8 @@ def main():
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
                 posxy = [pos[0] // SQ_SIZE, pos[1] // SQ_SIZE]  # i want to se the board like a matrix
+                
+                print(posxy)
                             
                 # check if is a piece
                 if board.board[posxy[0]][posxy[1]] != '--':

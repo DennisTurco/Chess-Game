@@ -2,7 +2,8 @@ import pygame
 import logging
 import sys
 
-import Board
+import Board as b
+import Move as m
 from Enums.Piece import Piece
 
 WIDTH = 512
@@ -32,8 +33,8 @@ def main():
 
     playerClicks = [[], []]
 
-    board = Board.Board()
-    move = Board.Move(playerClicks, board.board)
+    board = b.Board()
+    move = m.Move(playerClicks, board.board)
     possiblePositions = move.getPossiblePositions()
 
     loadImages()
@@ -50,7 +51,7 @@ def main():
                 pos = pygame.mouse.get_pos()
                 posxy = [pos[0] // SQ_SIZE, pos[1] // SQ_SIZE]  # i want to se the board like a matrix
 
-                print(posxy)
+                print(f"position clicked = {posxy}")
 
                 # check if is a piece
                 if board.board[posxy[0]][posxy[1]] != Piece.EMPTY:

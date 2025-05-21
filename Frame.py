@@ -2,8 +2,10 @@ import pygame
 import logging
 import sys
 
-import Board as b
-import Move as m
+from Board import Board
+from Move import Move
+from Entities.Posxy import Posxy
+from Entities.PositionMovement import PositionMovement
 from Enums.Piece import Piece
 
 WIDTH = 512
@@ -20,7 +22,7 @@ def loadImages():
         try:
             IMAGES[piece] = pygame.transform.scale(pygame.image.load(image), (SQ_SIZE, SQ_SIZE))
         except:
-            logging.error(sys.argv[0] + " -> error on loading image '" + image + "'")
+            logging.error(f"{sys.argv[0]} -> error on loading image")
 
 def main():
     pygame.init()    # initialize pygame
@@ -31,10 +33,10 @@ def main():
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     screen.fill(pygame.Color('white'))
 
-    playerClicks = [[], []]
+    playerClicks: PositionMovement = PositionMovement()
 
-    board = b.Board()
-    move = m.Move(playerClicks, board.board)
+    board = Board()
+    move = Move(playerClicks, board.board)
     possiblePositions = move.getPossiblePositions()
 
     loadImages()
@@ -49,35 +51,35 @@ def main():
             # handle MOUSEBUTTONUP
             if event.type == pygame.MOUSEBUTTONUP:
                 pos = pygame.mouse.get_pos()
-                posxy = [pos[0] // SQ_SIZE, pos[1] // SQ_SIZE]  # i want to se the board like a matrix
+                posxy: Posxy = Posxy(pos[0] // SQ_SIZE, pos[1] // SQ_SIZE)
 
                 print(f"position clicked = {posxy}")
 
                 # check if is a piece
-                if board.board[posxy[0]][posxy[1]] != Piece.EMPTY:
+                if board.board[posxy.x][posxy.y] != Piece.EMPTY:
 
-                    if playerClicks[0] == [] or (move.isPlayerWhiteTurn() and move.isWhitePiece(posxy[0], posxy[1])) or (not move.isPlayerWhiteTurn() and not move.isWhitePiece(posxy[0], posxy[1])):
-                        playerClicks[0] = posxy
+                    if playerClicks.initial_position is None or (move.isPlayerWhiteTurn() and move.isWhitePiece(posxy.x, posxy.y)) or (not move.isPlayerWhiteTurn() and not move.isWhitePiece(posxy.x, posxy.y)):
+                        playerClicks.initial_position = posxy
                         move.setPossibleMovements(posxy)
                         possiblePositions = move.getPossiblePositions()
 
-                    elif playerClicks[0] == posxy:
-                        playerClicks[0] = []
+                    elif playerClicks.initial_position == posxy:
+                        playerClicks.initial_position = None
 
                     # check if the second position is a piece
-                    elif playerClicks[0] != []:
-                        playerClicks[1] = posxy
+                    elif playerClicks.initial_position is not None:
+                        playerClicks.final_position = posxy
                         move.captureRequest(playerClicks)
-                        playerClicks = [[], []]
+                        playerClicks = PositionMovement()
                         # reset possiblePositions
                         possiblePositions = move.getPossiblePositions()
 
                 # check if first position is selected and the second not
-                elif playerClicks[0] != [] and playerClicks[1] == []:
-                    playerClicks[1] = posxy
+                elif playerClicks.initial_position is not None and playerClicks.final_position is None:
+                    playerClicks.final_position = posxy
                     move.moveRequest(playerClicks)
                     print(playerClicks)
-                    playerClicks = [[], []]
+                    playerClicks = PositionMovement()
                     # reset possiblePositions
                     possiblePositions = move.getPossiblePositions()
 
@@ -87,13 +89,8 @@ def main():
 
 
 def drawGameState(screen, board, possiblePositions):
-    # draw squares on the board
     drawBoard(screen)
-
-    # draw Highlight
     drawHighlight(screen, possiblePositions)
-
-    # draw pieces on the board
     drawPieces(screen, board)
 
 def drawBoard(screen):
@@ -131,4 +128,5 @@ def drawPieces(screen, board):
                     logging.error(f"{sys.argv[0]} -> cannot load piece '{piece}' into the board")
 
 if __name__ == "__main__":
-    main()
+    try: main()
+    except: logging.exception(f"{sys.argv[0]}")

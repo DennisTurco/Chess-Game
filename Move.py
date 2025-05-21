@@ -1,6 +1,7 @@
 import logging
 import sys
 import simpleaudio
+
 import MessageBox as mb
 from Enums.Piece import Color, Piece, PieceType
 from Pieces.Bishop import Bishop
@@ -13,8 +14,7 @@ from Pieces.Pawn import Pawn
 class Move():
 
     def __init__(self, playerClicks, board):
-        self.__pos_start = playerClicks[0]
-        self.__pos_final = playerClicks[1]
+        self.__playerClicks = playerClicks
         self.__board = board
         self.__whiteMove = True
         self.__finished = False
@@ -28,7 +28,7 @@ class Move():
             self.__sound_move = simpleaudio.WaveObject.from_wave_file("sounds/move.wav")
             self.__sound_capture = simpleaudio.WaveObject.from_wave_file("sounds/capture.wav")
         except:
-            logging.error(sys.argv[0] + " -> error on loading sounds")
+            logging.error(f"{sys.argv[0]} -> error on loading sounds")
 
     def __initPossiblePositions(self):
         # create a matrix 8 x 8 full with '0'
@@ -45,25 +45,31 @@ class Move():
         return self.__whiteMove
 
     def __modifyPosition(self):
-        # check if it is a simple move or someone is capturing a piece to play the correct sound
-        if self.getTargetPieceName() == Piece.EMPTY:
-            try: self.__sound_move.play()
-            except: logging.error(sys.argv[0] + " -> error on playing sound")
-        else:
-            try: self.__sound_capture.play()
-            except: logging.error(sys.argv[0] + " -> error on playing sound")
+        self.__playSound()
 
         self.__initPossiblePositions()
 
-        self.__board[self.__pos_final[0]][self.__pos_final[1]] = self.getCurrentPieceName()
-        self.__board[self.__pos_start[0]][self.__pos_start[1]] = Piece.EMPTY
+        self.__board[self.__playerClicks.final_position.x][self.__playerClicks.final_position.y] = self.getCurrentPieceName()
+        self.__board[self.__playerClicks.initial_position.x][self.__playerClicks.initial_position.y] = Piece.EMPTY
 
         if self.__whiteMove == True:
             self.__whiteMove = False
         else:
             self.__whiteMove = True
 
-        #self.__printMatrix(self.__board)
+        self.__printMatrix(self.__board)
+
+
+    # check if it is a simple move or someone is capturing a piece to play the correct sound
+    def __playSound(self):
+        try:
+            if self.getTargetPieceName() == Piece.EMPTY:
+                self.__sound_move.play()
+            else:
+                self.__sound_capture.play()
+        except:
+            logging.error(f"{sys.argv[0]} -> error on playing sound")
+
 
     def captureRequest(self, playerClicks):
         if self.__finished: return
@@ -79,32 +85,14 @@ class Move():
             self.moveRequest(playerClicks)
             self.isCheckMate()
 
+
     def setPossibleMovements(self, posxy):
-
+        if not self.__canMove(posxy):
+            return
         self.__initPossiblePositions()
+        piece = self.getCurrentPieceName(posxy.x, posxy.y)
+        self.__checkPossibleMoveByPieceType(piece.type, posxy, piece)
 
-        piece = self.getCurrentPieceName2(posxy[0], posxy[1])
-
-        if self.isWhitePiece(posxy[0], posxy[1]) and not self.__whiteMove: return
-        if not self.isWhitePiece(posxy[0], posxy[1]) and self.__whiteMove: return
-
-        if piece.type == PieceType.PAWN:
-           self.__pawnPossiblesMove(posxy, piece)
-
-        elif piece.type == PieceType.ROOK:
-            self.__rookPossiblesMove(posxy)
-
-        elif piece.type == PieceType.BISHOP:
-            self.__bishopPossiblesMove(posxy)
-
-        elif piece.type == PieceType.KNIGHT:
-            self.__knightPossiblesMove(posxy)
-
-        elif piece.type == PieceType.QUEEN:
-            self.__queenPossiblesMove(posxy)
-
-        elif piece.type == PieceType.KING:
-            self.__kingPossiblesMove(posxy)
 
     def moveRequest(self, playerClicks):
         if self.__finished: return
@@ -116,14 +104,38 @@ class Move():
 
         # errors check
         if piece == Color.WHITE and self.__whiteMove == False:
-            logging.error(sys.argv[0] + " -> 'piece[0] == \"w\" and self.__whiteMove == False'")
+            logging.error(f"{sys.argv[0]} -> 'piece == Color.WHITE and self.__whiteMove == False'")
             return
         elif piece == Color.BLACK and self.__whiteMove == True:
-            logging.error(sys.argv[0] + " -> 'piece[0] == \"b\" and self.__whiteMove == True'")
+            logging.error(f"{sys.argv[0]} -> 'piece == Color.BLACK and self.__whiteMove == True'")
             return
 
         # movement
         self.__pieceMove()
+
+
+    def __canMove(self, posxy) -> bool:
+        if self.isWhitePiece(posxy.x, posxy.y) and not self.__whiteMove: return False
+        if not self.isWhitePiece(posxy.x, posxy.y) and self.__whiteMove: return False
+        return True
+
+
+    def __checkPossibleMoveByPieceType(self, type, posxy, piece):
+        match type:
+            case PieceType.PAWN:
+                self.__pawnPossiblesMove(posxy, piece)
+            case PieceType.ROOK:
+                self.__rookPossiblesMove(posxy)
+            case PieceType.BISHOP:
+                self.__bishopPossiblesMove(posxy)
+            case PieceType.KNIGHT:
+                self.__knightPossiblesMove(posxy)
+            case PieceType.QUEEN:
+                self.__queenPossiblesMove(posxy)
+            case PieceType.KING:
+                self.__kingPossiblesMove(posxy)
+            case _:
+                raise Exception(f"Piece type '{piece.type} does\'t exist'")
 
 
     def __pawnPossiblesMove(self, posxy, piece):
@@ -158,19 +170,18 @@ class Move():
 
     def __pieceMove(self):
         # check if it is a correct movement or a capture (if the result is: 1 -> movement; 2 -> capture)
-        if self.__possibleMovements[self.__pos_final[0]][self.__pos_final[1]] != 0:
+        if self.__possibleMovements[self.__playerClicks.final_position.x][self.__playerClicks.final_position.y] != 0:
             self.__modifyPosition()
         else: return
 
-    def getCurrentPieceName(self):
-        return self.__board[self.__pos_start[0]][self.__pos_start[1]]
-
-    # FIXME: why is not possible overloading?? python is shit (i want java.....)
-    def getCurrentPieceName2(self, posx, posy):
-        return self.__board[posx][posy]
+    def getCurrentPieceName(self, posx = None, posy = None):
+        if posx is None or posy is None:
+            return self.__board[self.__playerClicks.initial_position.x][self.__playerClicks.initial_position.y]
+        else:
+            return self.__board[posx][posy]
 
     def getTargetPieceName(self):
-        return self.__board[self.__pos_final[0]][self.__pos_final[1]]
+        return self.__board[self.__playerClicks.final_position.x][self.__playerClicks.final_position.y]
 
     def getPossibleTargetPieceName(self, posx, posy):
         return self.__board[posx][posy]
@@ -188,7 +199,7 @@ class Move():
         whiteKing = False
         for i in range(len(self.__board)):
             for j in range(len(self.__board)):
-                piece = self.getCurrentPieceName2(i, j)
+                piece = self.getCurrentPieceName(i, j)
                 if piece == Piece.BLACK_KING: blackKing = True
                 elif piece == Piece.WHITE_KING: whiteKing = True
 
@@ -204,5 +215,4 @@ class Move():
                 self.__board
 
     def __setPlayerClicks(self, playerClicks):
-        self.__pos_start = playerClicks[0]
-        self.__pos_final = playerClicks[1]
+        self.__playerClicks = playerClicks

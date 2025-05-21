@@ -14,7 +14,8 @@ class Pawn:
         return self.board[x][y] if 0 <= x < 8 and 0 <= y < 8 else None
 
     def generate_moves(self, posxy, piece_color):
-        x, y = posxy
+        x = posxy.x
+        y = posxy.y
 
         if self.is_white_turn:
             self._forward_move_white(x, y)

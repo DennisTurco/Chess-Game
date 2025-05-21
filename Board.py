@@ -1,7 +1,7 @@
 import copy
 from Enums.Piece import Piece
-class Board():
 
+class Board():
     def __init__(self):
         self.board = [
             [Piece.BLACK_ROOK, Piece.BLACK_PAWN, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.WHITE_PAWN, Piece.WHITE_ROOK],

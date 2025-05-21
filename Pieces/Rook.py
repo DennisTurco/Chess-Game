@@ -16,7 +16,8 @@ class Rook:
             self._scan_line(posxy, dx, dy)
 
     def _scan_line(self, posxy, dx, dy):
-        x, y = posxy
+        x = posxy.x
+        y = posxy.y
         i, j = x + dx, y + dy
 
         while 0 <= i < 8 and 0 <= j < 8:

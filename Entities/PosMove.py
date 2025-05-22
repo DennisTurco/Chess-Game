@@ -1,11 +1,11 @@
 from typing import Optional
-from Entities.Posxy import Posxy
+from Entities.Pos import Pos
 
-class PositionMovement:
-    initial_position: Optional[Posxy]
-    final_position: Optional[Posxy]
+class PosMove:
+    initial_position: Optional[Pos]
+    final_position: Optional[Pos]
 
-    def __init__(self, initial_position: Optional[Posxy] = None, final_position: Optional[Posxy] = None):
+    def __init__(self, initial_position: Optional[Pos] = None, final_position: Optional[Pos] = None):
         self.initial_position = initial_position
         self.final_position = final_position
 

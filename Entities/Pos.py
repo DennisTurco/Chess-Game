@@ -1,4 +1,4 @@
-class Posxy:
+class Pos:
     x: int
     y: int
 

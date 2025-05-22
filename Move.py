@@ -20,15 +20,17 @@ class Move():
         self.__finished = False
         self.__blackKingCastling = True
         self.__whiteKingCastling = True
-        self.__possibleMovements = [[],[]]
+        self.__possibleMovements = self.reset_posssible_positions()
 
         self.__initPossiblePositions()
+
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         try:
             self.__sound_move = simpleaudio.WaveObject.from_wave_file("sounds/move.wav")
             self.__sound_capture = simpleaudio.WaveObject.from_wave_file("sounds/capture.wav")
         except:
-            logging.error(f"{sys.argv[0]} -> error on loading sounds")
+            self.logger.error(f"{sys.argv[0]} -> error on loading sounds")
 
     def __initPossiblePositions(self):
         # create a matrix 8 x 8 full with '0'
@@ -36,6 +38,10 @@ class Move():
 
     def getPossiblePositions(self):
         return self.__possibleMovements
+
+    def reset_posssible_positions(self):
+        self.__possibleMovements = [[],[]]
+        return self.getPossiblePositions()
 
     def isWhitePiece(self, x, y):
         piece = self.__board[x][y]
@@ -68,11 +74,12 @@ class Move():
             else:
                 self.__sound_capture.play()
         except:
-            logging.error(f"{sys.argv[0]} -> error on playing sound")
+            self.logger.error(f"{sys.argv[0]} -> error on playing sound")
 
 
+    # return True if the piace has been moved correctly
     def captureRequest(self, playerClicks):
-        if self.__finished: return
+        if self.__finished: return False
 
         # set __pos_start and __pos_final
         self.__setPlayerClicks(playerClicks)
@@ -80,10 +87,12 @@ class Move():
         # the white piace cannot eat another white piece (same for black)
         piece = self.getTargetPieceName()
         if  (self.__whiteMove == True and piece == Color.WHITE) or (self.__whiteMove == False and piece == Color.BLACK):
-            return
+            return False
         else:
-            self.moveRequest(playerClicks)
-            self.isCheckMate()
+            return (
+                self.moveRequest(playerClicks) or
+                self.isCheckMate()
+            )
 
 
     def setPossibleMovements(self, posxy):
@@ -94,8 +103,9 @@ class Move():
         self.__checkPossibleMoveByPieceType(piece.type, posxy, piece)
 
 
-    def moveRequest(self, playerClicks):
-        if self.__finished: return
+    # return True if the piace hab been moved correctly
+    def moveRequest(self, playerClicks) -> bool:
+        if self.__finished: return False
 
         # set __pos_start and __pos_final
         self.__setPlayerClicks(playerClicks)
@@ -104,14 +114,14 @@ class Move():
 
         # errors check
         if piece == Color.WHITE and self.__whiteMove == False:
-            logging.error(f"{sys.argv[0]} -> 'piece == Color.WHITE and self.__whiteMove == False'")
-            return
+            self.logger.error(f"{sys.argv[0]} -> 'piece == Color.WHITE and self.__whiteMove == False'")
+            return False
         elif piece == Color.BLACK and self.__whiteMove == True:
-            logging.error(f"{sys.argv[0]} -> 'piece == Color.BLACK and self.__whiteMove == True'")
-            return
+            self.logger.error(f"{sys.argv[0]} -> 'piece == Color.BLACK and self.__whiteMove == True'")
+            return False
 
         # movement
-        self.__pieceMove()
+        return self.__pieceMove()
 
 
     def __canMove(self, posxy) -> bool:
@@ -168,11 +178,13 @@ class Move():
         king.generate_moves(posxy)
         self.__possibleMovements = king.get_possible_moves()
 
-    def __pieceMove(self):
+    # return True if the piace hab been moved correctly
+    def __pieceMove(self) -> bool:
         # check if it is a correct movement or a capture (if the result is: 1 -> movement; 2 -> capture)
         if self.__possibleMovements[self.__playerClicks.final_position.x][self.__playerClicks.final_position.y] != 0:
             self.__modifyPosition()
-        else: return
+            return True
+        else: return False
 
     def getCurrentPieceName(self, posx = None, posy = None):
         if posx is None or posy is None:
@@ -193,7 +205,7 @@ class Move():
     def isFinished(self):
         return self.__finished
 
-    def isCheckMate(self):
+    def isCheckMate(self) -> bool:
         # check possible check mate, i'm serching king piece. assign to true if they are on the __board
         blackKing = False
         whiteKing = False
@@ -213,6 +225,8 @@ class Move():
             if messageBox.getRestartResponse() == True:
                 self.__finished = False
                 self.__board
+
+        return False
 
     def __setPlayerClicks(self, playerClicks):
         self.__playerClicks = playerClicks

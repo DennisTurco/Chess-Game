@@ -2,7 +2,7 @@ import logging
 import sys
 import simpleaudio
 
-import MessageBox as mb
+from MessageBox import MessageBox
 from Enums.Piece import Color, Piece, PieceType
 from Pieces.Bishop import Bishop
 from Pieces.Rook import Rook
@@ -29,8 +29,8 @@ class Move():
         try:
             self.__sound_move = simpleaudio.WaveObject.from_wave_file("sounds/move.wav")
             self.__sound_capture = simpleaudio.WaveObject.from_wave_file("sounds/capture.wav")
-        except:
-            self.logger.error(f"{sys.argv[0]} -> error on loading sounds")
+        except Exception as e:
+            self.logger.error(f"{sys.argv[0]} -> error on loading sounds: {e}")
 
     def __initPossiblePositions(self):
         # create a matrix 8 x 8 full with '0'
@@ -40,7 +40,7 @@ class Move():
         return self.__possibleMovements
 
     def reset_posssible_positions(self):
-        self.__possibleMovements = [[],[]]
+        self.__possibleMovements = [[0 for _ in range(8)] for _ in range(8)]
         return self.getPossiblePositions()
 
     def isWhitePiece(self, x, y):
@@ -58,12 +58,11 @@ class Move():
         self.__board[self.__playerClicks.final_position.x][self.__playerClicks.final_position.y] = self.getCurrentPieceName()
         self.__board[self.__playerClicks.initial_position.x][self.__playerClicks.initial_position.y] = Piece.EMPTY
 
-        if self.__whiteMove == True:
-            self.__whiteMove = False
-        else:
-            self.__whiteMove = True
+        # change turn
+        self.__whiteMove = not self.__whiteMove
 
-        self.__printMatrix(self.__board)
+
+        #self.__printMatrix(self.__board)
 
 
     # check if it is a simple move or someone is capturing a piece to play the correct sound
@@ -86,7 +85,8 @@ class Move():
 
         # the white piace cannot eat another white piece (same for black)
         piece = self.getTargetPieceName()
-        if  (self.__whiteMove == True and piece == Color.WHITE) or (self.__whiteMove == False and piece == Color.BLACK):
+        if (self.__whiteMove and piece != Piece.EMPTY and piece.color == Color.WHITE) or \
+            (not self.__whiteMove and piece != Piece.EMPTY and piece.color == Color.BLACK):
             return False
         else:
             return (
@@ -113,10 +113,10 @@ class Move():
         piece = self.getCurrentPieceName()
 
         # errors check
-        if piece == Color.WHITE and self.__whiteMove == False:
+        if piece.color == Color.WHITE and self.__whiteMove == False:
             self.logger.error(f"{sys.argv[0]} -> 'piece == Color.WHITE and self.__whiteMove == False'")
             return False
-        elif piece == Color.BLACK and self.__whiteMove == True:
+        elif piece.color == Color.BLACK and self.__whiteMove == True:
             self.logger.error(f"{sys.argv[0]} -> 'piece == Color.BLACK and self.__whiteMove == True'")
             return False
 
@@ -217,16 +217,23 @@ class Move():
 
         if not blackKing or not whiteKing:
             self.__finished = True
-            messageBox = mb.MessageBox()
+            messageBox = MessageBox()
             if not whiteKing: messageBox.setWinner(False) # white is winner
             else: messageBox.setWinner(True) # black is winner
 
             # check for restart
-            if messageBox.getRestartResponse() == True:
-                self.__finished = False
-                self.__board
+            if messageBox.getRestartResponse():
+                self.resetGame()
 
-        return False
+        return self.__finished
 
     def __setPlayerClicks(self, playerClicks):
         self.__playerClicks = playerClicks
+
+    def resetGame(self):
+        self.__board.restartBoard()
+        self.__whiteMove = True
+        self.__finished = False
+        self.__whiteKingCastling = True
+        self.__blackKingCastling = True
+        self.__initPossiblePositions()

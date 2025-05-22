@@ -13,7 +13,7 @@ class Board():
             [Piece.BLACK_KNIGHT, Piece.BLACK_PAWN, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.WHITE_PAWN, Piece.WHITE_KNIGHT],
             [Piece.BLACK_ROOK, Piece.BLACK_PAWN, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.EMPTY, Piece.WHITE_PAWN, Piece.WHITE_ROOK],
         ]
-        self.startBoard = self.board
+        self.startBoard = copy.deepcopy(self.board)
 
     def restartBoard(self):
         self.board = copy.deepcopy(self.startBoard) # to reset competly the board

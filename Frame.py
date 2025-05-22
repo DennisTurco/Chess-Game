@@ -49,7 +49,6 @@ def main():
     possiblePositions = move.getPossiblePositions()
 
     loadImages()
-    buttons = draw_buttons(screen)
     running = True
 
     while running:
@@ -70,6 +69,7 @@ def main():
                     move_history.clear()
                     playerClicks = PosMove()
                     possiblePositions = move.reset_posssible_positions()
+                    refresh(screen, board, possiblePositions, move_history)
                     continue
 
                 # Se il click è nella sidebar, ignoralo
@@ -115,10 +115,11 @@ def main():
                     playerClicks = PosMove()
                     possiblePositions = move.reset_posssible_positions()
 
-            # draw
-            drawGameState(screen, board.board, possiblePositions, move_history)
-            pygame.display.flip()
+            refresh(screen, board, possiblePositions, move_history)
 
+def refresh(screen, board, possiblePositions, move_history):
+    drawGameState(screen, board.board, possiblePositions, move_history)
+    pygame.display.flip()
 
 def drawGameState(screen, board, possiblePositions, move_history):
     drawSidebar(screen, move_history)

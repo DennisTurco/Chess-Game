@@ -7,7 +7,7 @@ from Move import Move
 from Widgets.ButtonImage import ButtonImage
 from Entities.Pos import Pos
 from Entities.PosMove import PosMove
-from Enums.Piece import Piece
+from Enums.Piece import PieceName
 
 SIDEBAR_WIDTH = 220
 WIDTH = 512
@@ -70,7 +70,7 @@ class Frame:
                     logging.debug(f"position clicked = {posxy}")
 
                     # check if is a piece
-                    if board.board[posxy.x][posxy.y] != Piece.EMPTY:
+                    if board.board[posxy.x][posxy.y] != PieceName.EMPTY:
 
                         if playerClicks.initial_position is None or (move.isPlayerWhiteTurn() and move.isWhitePiece(posxy.x, posxy.y)) or (not move.isPlayerWhiteTurn() and not move.isWhitePiece(posxy.x, posxy.y)):
                             playerClicks.initial_position = posxy
@@ -213,7 +213,7 @@ class Frame:
     def drawPieces(self, screen, board):
         for i in range(DIMENSION):
             for j in range(DIMENSION):
-                if board[i][j] != Piece.EMPTY:
+                if board[i][j] != PieceName.EMPTY:
                     piece = str(board[i][j])
                     try:
                         x = i * SQ_SIZE + SIDEBAR_WIDTH

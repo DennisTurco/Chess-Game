@@ -14,7 +14,7 @@ class PieceType(Enum):
     KING = 'K'
     EMPTY = '--'  # empty cell
 
-class Piece(Enum):
+class PieceName(Enum):
     EMPTY = (Color.NONE, PieceType.EMPTY)
     WHITE_PAWN = (Color.WHITE, PieceType.PAWN)
     WHITE_ROOK = (Color.WHITE, PieceType.ROOK)
@@ -34,17 +34,17 @@ class Piece(Enum):
         self.type = type_
 
     def __str__(self):
-        if self == Piece.EMPTY:
+        if self == PieceName.EMPTY:
             return '--'
         return self.color.value + self.type.value
 
     @staticmethod
     def from_string(s):
         if s == '--':
-            return Piece.EMPTY
+            return PieceName.EMPTY
         color = Color(s[0])
         type_ = PieceType(s[1])
-        for piece in Piece:
+        for piece in PieceName:
             if piece.color == color and piece.type == type_:
                 return piece
         raise ValueError(f"Invalid piece string: {s}")

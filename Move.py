@@ -3,13 +3,22 @@ import sys
 import simpleaudio
 
 from MessageBox import MessageBox
-from Enums.Piece import Color, Piece, PieceType
+from Enums.Piece import Color, PieceName, PieceType
 from Pieces.Bishop import Bishop
 from Pieces.Rook import Rook
 from Pieces.King import King
 from Pieces.Knight import Knight
 from Pieces.Queen import Queen
 from Pieces.Pawn import Pawn
+
+PIECE_CLASS_MAP = {
+    PieceType.PAWN: Pawn,
+    PieceType.ROOK: Rook,
+    PieceType.BISHOP: Bishop,
+    PieceType.KNIGHT: Knight,
+    PieceType.QUEEN: Queen,
+    PieceType.KING: King
+}
 
 class Move():
 
@@ -45,7 +54,7 @@ class Move():
 
     def isWhitePiece(self, x, y):
         piece = self.__board[x][y]
-        return piece != Piece.EMPTY and piece.color == Color.WHITE
+        return piece != PieceName.EMPTY and piece.color == Color.WHITE
 
     def isPlayerWhiteTurn(self):
         return self.__whiteMove
@@ -56,22 +65,19 @@ class Move():
         self.__initPossiblePositions()
 
         self.__board[self.__playerClicks.final_position.x][self.__playerClicks.final_position.y] = self.getCurrentPieceName()
-        self.__board[self.__playerClicks.initial_position.x][self.__playerClicks.initial_position.y] = Piece.EMPTY
+        self.__board[self.__playerClicks.initial_position.x][self.__playerClicks.initial_position.y] = PieceName.EMPTY
 
         # change turn
         self.__whiteMove = not self.__whiteMove
 
-
-        #self.__printMatrix(self.__board)
+        print("\n###############################")
+        self.__printMatrix(self.__board)
 
 
     # check if it is a simple move or someone is capturing a piece to play the correct sound
     def __playSound(self):
         try:
-            if self.getTargetPieceName() == Piece.EMPTY:
-                self.__sound_move.play()
-            else:
-                self.__sound_capture.play()
+            self.__sound_move.play() if self.getTargetPieceName() == PieceName.EMPTY else self.__sound_capture.play()
         except:
             self.logger.error(f"{sys.argv[0]} -> error on playing sound")
 
@@ -85,8 +91,8 @@ class Move():
 
         # the white piace cannot eat another white piece (same for black)
         piece = self.getTargetPieceName()
-        if (self.__whiteMove and piece != Piece.EMPTY and piece.color == Color.WHITE) or \
-            (not self.__whiteMove and piece != Piece.EMPTY and piece.color == Color.BLACK):
+        if (self.__whiteMove and piece != PieceName.EMPTY and piece.color == Color.WHITE) or \
+            (not self.__whiteMove and piece != PieceName.EMPTY and piece.color == Color.BLACK):
             return False
         else:
             return (
@@ -100,7 +106,7 @@ class Move():
             return
         self.__initPossiblePositions()
         piece = self.getCurrentPieceName(posxy.x, posxy.y)
-        self.__checkPossibleMoveByPieceType(piece.type, posxy, piece)
+        self.__checkPossibleMoveByPieceType(piece.type, posxy)
 
 
     # return True if the piace hab been moved correctly
@@ -125,58 +131,20 @@ class Move():
 
 
     def __canMove(self, posxy) -> bool:
-        if self.isWhitePiece(posxy.x, posxy.y) and not self.__whiteMove: return False
-        if not self.isWhitePiece(posxy.x, posxy.y) and self.__whiteMove: return False
+        if (self.isWhitePiece(posxy.x, posxy.y) and not self.__whiteMove) or \
+            (not self.isWhitePiece(posxy.x, posxy.y) and self.__whiteMove):
+            return False
         return True
 
 
-    def __checkPossibleMoveByPieceType(self, type, posxy, piece):
-        match type:
-            case PieceType.PAWN:
-                self.__pawnPossiblesMove(posxy, piece)
-            case PieceType.ROOK:
-                self.__rookPossiblesMove(posxy)
-            case PieceType.BISHOP:
-                self.__bishopPossiblesMove(posxy)
-            case PieceType.KNIGHT:
-                self.__knightPossiblesMove(posxy)
-            case PieceType.QUEEN:
-                self.__queenPossiblesMove(posxy)
-            case PieceType.KING:
-                self.__kingPossiblesMove(posxy)
-            case _:
-                raise Exception(f"Piece type '{piece.type} does\'t exist'")
-
-
-    def __pawnPossiblesMove(self, posxy, piece):
-        pawn = Pawn(self.__board, self.__whiteMove)
-        pawn.generate_moves(posxy, piece.color)
-        self.__possibleMovements = pawn.get_possible_moves()
-
-    def __rookPossiblesMove(self, posxy):
-        rock = Rook(self.__board, self.__whiteMove)
-        rock.generate_moves(posxy)
-        self.__possibleMovements = rock.get_possible_moves()
-
-    def __bishopPossiblesMove(self, posxy):
-        bishop = Bishop(self.__board, self.__whiteMove)
-        bishop.generate_moves(posxy)
-        self.__possibleMovements = bishop.get_possible_moves()
-
-    def __knightPossiblesMove(self, posxy):
-        knight = Knight(self.__board, self.__whiteMove)
-        knight.generate_moves(posxy)
-        self.__possibleMovements = knight.get_possible_moves()
-
-    def __queenPossiblesMove(self, posxy):
-        queen = Queen(self.__board, self.__whiteMove)
-        queen.generate_moves(posxy)
-        self.__possibleMovements = queen.get_possible_moves()
-
-    def __kingPossiblesMove(self, posxy):
-        king = King(self.__board, self.__whiteMove)
-        king.generate_moves(posxy)
-        self.__possibleMovements = king.get_possible_moves()
+    def __checkPossibleMoveByPieceType(self, type, posxy):
+        try:
+            piece_class = PIECE_CLASS_MAP[type]
+            piece = piece_class(self.__board, self.__whiteMove)
+            piece.generate_moves(posxy)
+            self.__possibleMovements = piece.get_possible_moves()
+        except KeyError:
+            raise Exception(f"PieceName type '{type}' does not exist")
 
     # return True if the piace hab been moved correctly
     def __pieceMove(self) -> bool:
@@ -200,7 +168,9 @@ class Move():
 
     def __printMatrix(self, matrix):
         for i in range(len(matrix)):
-            print(matrix[i])
+            for j in range(len(matrix)):
+                print(f"{str(matrix[i][j])} ", end="")
+            print()
 
     def isFinished(self):
         return self.__finished
@@ -212,8 +182,8 @@ class Move():
         for i in range(len(self.__board)):
             for j in range(len(self.__board)):
                 piece = self.getCurrentPieceName(i, j)
-                if piece == Piece.BLACK_KING: blackKing = True
-                elif piece == Piece.WHITE_KING: whiteKing = True
+                if piece == PieceName.BLACK_KING: blackKing = True
+                elif piece == PieceName.WHITE_KING: whiteKing = True
 
         if not blackKing or not whiteKing:
             self.__finished = True

@@ -1,58 +1,27 @@
-from Enums.Piece import Color, Piece
+from Enums.Piece import PieceName
+from Pieces.Piece import Piece
 
-class Pawn:
+class Pawn(Piece):
     def __init__(self, board, is_white_turn):
-        self.board = board
-        self.is_white_turn = is_white_turn
-        self.possible_moves = [[0 for _ in range(8)] for _ in range(8)]
+        super().__init__(board, is_white_turn)
 
-    def is_white_piece(self, x, y):
-        piece = self.board[x][y]
-        return piece != Piece.EMPTY and piece.color == Color.WHITE
+    def generate_moves(self, posxy):
+        x, y = posxy.x, posxy.y
+        direction = -1 if self.is_white_turn else 1
+        start_row = 6 if self.is_white_turn else 1
 
-    def get_piece_at(self, x, y):
-        return self.board[x][y] if 0 <= x < 8 and 0 <= y < 8 else None
+        # forward movement (1 cell)
+        if self.board[x][y + direction] == PieceName.EMPTY:
+            self.possible_moves[x][y + direction] = 1
 
-    def generate_moves(self, posxy, piece_color):
-        x = posxy.x
-        y = posxy.y
+            # initial movement (2 cells)
+            if y == start_row and self.board[x][y + 2 * direction] == PieceName.EMPTY:
+                self.possible_moves[x][y + 2 * direction] = 1
 
-        if self.is_white_turn:
-            self._forward_move_white(x, y)
-            if piece_color == Color.WHITE:
-                self._capture_white(x, y)
-        else:
-            self._forward_move_black(x, y)
-            if piece_color == Color.BLACK:
-                self._capture_black(x, y)
-
-    def _forward_move_white(self, x, y):
-        if self.get_piece_at(x, y - 1) == Piece.EMPTY:
-            self.possible_moves[x][y - 1] = 1
-            if y == 6 and self.get_piece_at(x, y - 2) == Piece.EMPTY:
-                self.possible_moves[x][y - 2] = 1
-
-    def _forward_move_black(self, x, y):
-        if self.get_piece_at(x, y + 1) == Piece.EMPTY:
-            self.possible_moves[x][y + 1] = 1
-            if y == 1 and self.get_piece_at(x, y + 2) == Piece.EMPTY:
-                self.possible_moves[x][y + 2] = 1
-
-    def _capture_white(self, x, y):
+        # diagonal capture
         for dx in [-1, 1]:
-            i, j = x + dx, y - 1
+            i = x + dx
+            j = y + direction
             if 0 <= i < 8 and 0 <= j < 8:
-                target = self.get_piece_at(i, j)
-                if target != Piece.EMPTY and not self.is_white_piece(i, j):
+                if self.board[i][j] != PieceName.EMPTY and self.is_valid_capture(i, j):
                     self.possible_moves[i][j] = 2
-
-    def _capture_black(self, x, y):
-        for dx in [-1, 1]:
-            i, j = x + dx, y + 1
-            if 0 <= i < 8 and 0 <= j < 8:
-                target = self.get_piece_at(i, j)
-                if target != Piece.EMPTY and self.is_white_piece(i, j):
-                    self.possible_moves[i][j] = 2
-
-    def get_possible_moves(self):
-        return self.possible_moves

@@ -9,6 +9,7 @@ def configure_logger():
     )
 
 def main():
+    configure_logger()
     Frame()
 
 if __name__ == "__main__":

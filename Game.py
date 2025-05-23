@@ -46,11 +46,7 @@ class Game:
                     pos = pygame.mouse.get_pos()
 
                     if self.buttons["reset"].is_clicked(pos):
-                        board = Board()
-                        move = Move(PosMove(), board.board, screen)
-                        move_history.clear()
-                        playerClicks = PosMove()
-                        possiblePositions = move.reset_posssible_positions()
+                        (board, move, move_history, playerClicks, possiblePositions) = self.restart_game(screen, move_history)
                         continue
 
                     if self.buttons["menu"].is_clicked(pos):
@@ -98,9 +94,24 @@ class Game:
                         # reset possiblePositions
                         playerClicks = PosMove()
                         possiblePositions = move.reset_posssible_positions()
-                # self.buttons["reset"].update()
+
+                if move.restart():
+                    (board, move, move_history, playerClicks, possiblePositions) = self.restart_game(screen, move_history)
+                    continue
+                elif move.isFinished():
+                    running = False
+                    return
+
                 self.refresh(screen, board, possiblePositions, move_history)
 
+
+    def restart_game(self, screen, move_history):
+        board = Board()
+        move = Move(PosMove(), board.board, screen)
+        move_history.clear()
+        playerClicks = PosMove()
+        possiblePositions = move.reset_posssible_positions()
+        return (board, move, move_history, playerClicks, possiblePositions)
 
     def loadImages(self):
         pieces = ['bB', 'bK', 'bN', 'bp', 'bQ', 'bR', 'wB', 'wK', 'wN', 'wp', 'wQ', 'wR']

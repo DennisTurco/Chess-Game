@@ -15,6 +15,7 @@ class Move():
         self.__screen = screen
         self.__whiteMove = True
         self.__finished = False
+        self.__restart = False
         self.__blackKingCastling = True
         self.__whiteKingCastling = True
         self.__possibleMovements = self.reset_posssible_positions()
@@ -78,10 +79,9 @@ class Move():
             (not self.__whiteMove and piece != PieceName.EMPTY and piece.color == Color.BLACK):
             return False
         else:
-            return (
-                self.moveRequest(playerClicks) or
-                self.isCheckMate()
-            )
+            move_request = self.moveRequest(playerClicks)
+            check_mate = self.isCheckMate()
+            return move_request or check_mate
 
 
     def setPossibleMovements(self, posxy):
@@ -159,6 +159,9 @@ class Move():
     def isFinished(self):
         return self.__finished
 
+    def restart(self):
+        return self.isFinished() and self.__restart
+
     def isCheckMate(self) -> bool:
         # check possible check mate, i'm serching king piece. assign to true if they are on the __board
         blackKing = False
@@ -173,23 +176,11 @@ class Move():
             self.__finished = True
             messageBox = MessageBox()
             if not whiteKing:
-                restart = messageBox.ask_restart(False, self.__screen) # white is winner
+                self.__restart = messageBox.ask_restart(False, self.__screen) # white is winner
             else:
-                restart = messageBox.ask_restart(True, self.__screen) # black is winner
-
-            # check for restart
-            if restart:
-                self.resetGame()
+                self.__restart = messageBox.ask_restart(True, self.__screen) # black is winner
 
         return self.__finished
 
     def __setPlayerClicks(self, playerClicks):
         self.__playerClicks = playerClicks
-
-    def resetGame(self):
-        self.__board.restartBoard()
-        self.__whiteMove = True
-        self.__finished = False
-        self.__whiteKingCastling = True
-        self.__blackKingCastling = True
-        self.__initPossiblePositions()

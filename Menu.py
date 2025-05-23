@@ -52,13 +52,3 @@ class Menu:
         self.main_menu.mainloop(surface)
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
         return self.mode, self.elo
-
-    def load_images(self):
-        self.exit_icon_surface = pygame.image.load('images/menu/logout.png')
-        self.exit_icon_surface = pygame.transform.scale(self.exit_icon_surface, (40, 40))
-        self.ai_icon = pygame.image.load('images/menu/ai.png')
-        self.ai_icon = pygame.transform.scale(self.ai_icon, (40, 40))
-        self.people_icon = pygame.image.load('images/menu/people.png')
-        self.people_icon = pygame.transform.scale(self.people_icon, (40, 40))
-        self.joystick_icon = pygame.image.load('images/menu/joystick.png')
-        self.joystick_icon = pygame.transform.scale(self.joystick_icon, (40, 40))

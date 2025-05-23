@@ -1,10 +1,11 @@
 import logging
 import sys
 from GameManager import GameManager
+
 def configure_logger():
     logging.basicConfig(
         level=logging.DEBUG,
-        format='%(asctime)s - [%(levelname)s] - %(name)s - %(message)s'
+        format='%(asctime)s - [%(levelname)s] - %(name)s:%(lineno)d - %(message)s'
     )
 
 def main():

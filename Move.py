@@ -1,6 +1,7 @@
 import logging
 import sys
-import simpleaudio
+
+import pygame
 
 from MessageBox import MessageBox
 from Enums.Piece import Color, PieceName
@@ -17,19 +18,15 @@ class Move():
         self.__whiteKingCastling = True
         self.__possibleMovements = self.reset_posssible_positions()
 
+        self.__sound_move = pygame.mixer.Sound("sounds/move.wav")
+        self.__sound_capture = pygame.mixer.Sound("sounds/capture.wav")
+
         self.__initPossiblePositions()
 
         self.logger = logging.getLogger(self.__class__.__name__)
 
-        try:
-            self.__sound_move = simpleaudio.WaveObject.from_wave_file("sounds/move.wav")
-            self.__sound_capture = simpleaudio.WaveObject.from_wave_file("sounds/capture.wav")
-        except Exception as e:
-            self.logger.error(f"{sys.argv[0]} -> error on loading sounds: {e}")
-
     def __initPossiblePositions(self):
-        # create a matrix 8 x 8 full with '0'
-        self.__possibleMovements = [[0 for x in range(len(self.__board))] for y in range(len(self.__board))]    
+        self.__possibleMovements = [[0 for x in range(len(self.__board))] for y in range(len(self.__board))] # create a matrix 8 x 8 full with '0'
 
     def getPossiblePositions(self):
         return self.__possibleMovements
@@ -56,7 +53,6 @@ class Move():
         # change turn
         self.__whiteMove = not self.__whiteMove
 
-        print("\n###############################")
         self.__printMatrix(self.__board)
 
 
@@ -153,6 +149,7 @@ class Move():
         return self.__board[posx][posy]
 
     def __printMatrix(self, matrix):
+        print("\n###############################")
         for i in range(len(matrix)):
             for j in range(len(matrix)):
                 print(f"{str(matrix[i][j])} ", end="")

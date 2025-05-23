@@ -1,0 +1,7 @@
+APP_NAME = "Chess Game"
+SIDEBAR_WIDTH = 220
+WIDTH = 512
+HEIGHT = 512
+WINDOW_WIDTH = WIDTH + SIDEBAR_WIDTH
+DIMENSION = 8   # dimension for chess board is 8x8
+SQ_SIZE = HEIGHT // DIMENSION   # square size

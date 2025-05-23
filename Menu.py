@@ -2,30 +2,33 @@ import pygame
 import pygame_menu
 from pygame_menu import themes, events
 
+import GameManager
+from Frame import Frame
+
 class Menu:
     def __init__(self):
         pygame.init()
-        self.surface = pygame.display.set_mode((600, 400))
-        pygame.display.set_caption("Chess Game")
+        self.surface = pygame.display.set_mode((GameManager.WINDOW_WIDTH, GameManager.HEIGHT))
+        pygame.display.set_caption(GameManager.APP_NAME)
 
         self.mode = None
         self.elo = 1200
 
-        self.main_menu = pygame_menu.Menu('Welcome on Chess Game', 600, 400, theme=themes.THEME_SOLARIZED)
-        self.mode_menu = pygame_menu.Menu('Modes', 600, 400, theme=themes.THEME_SOLARIZED)
+        self.main_menu = pygame_menu.Menu('Welcome on Chess Game', GameManager.WINDOW_WIDTH, GameManager.HEIGHT, theme=themes.THEME_SOLARIZED)
+        self.mode_menu = pygame_menu.Menu('Modes', GameManager.WINDOW_WIDTH, GameManager.HEIGHT, theme=themes.THEME_SOLARIZED)
 
         self.mode_menu.add.button('Player vs Player', lambda: self.start_game(mode="pvp"))
         self.mode_menu.add.button('Player vs AI', action=self.elo_menu)
         self.mode_menu.add.button('Back', events.BACK)
 
-        self.elo_select_menu = pygame_menu.Menu('Select AI Difficulty (ELO)', 600, 400, theme=themes.THEME_SOLARIZED)
+        self.elo_select_menu = pygame_menu.Menu('Select AI Difficulty (ELO)', GameManager.WINDOW_WIDTH, GameManager.HEIGHT, theme=themes.THEME_SOLARIZED)
         self.elo_select_menu.add.selector('ELO level:', [
             ('400', 400), ('600', 600), ('800', 800), ('1000', 1000), ('1200', 1200), ('1500', 1500),
             ('1800', 1800), ('2000', 2000), ('2200', 2200), ('2500', 2500),
             ('2800', 2800), ('3000', 3000)
             ], onchange=self.set_elo)
         self.elo_select_menu.add.button('Start AI Game', lambda: self.start_game(mode="ai"))
-        self.elo_select_menu.add.button('Back', events.BACK)
+        self.elo_select_menu.add.button('Back', lambda: self.main_menu.mainloop(self.surface))
 
         self.main_menu.add.button('Play / Modes', self.mode_menu)
         self.main_menu.add.button('Quit', events.EXIT)
@@ -35,14 +38,17 @@ class Menu:
         print(f"ELO selected: {self.elo}")
 
     def elo_menu(self):
-        # Passa al menu di selezione ELO
         self.elo_select_menu.mainloop(self.surface)
 
     def start_game(self, mode):
         self.mode = mode
-        print(f"Avvio gioco in modalità: {mode}")
+        print(f"Start game in mode: {mode}")
         if mode == "ai":
-            print(f"Livello AI (ELO): {self.elo}")
+            print(f"AI level (ELO): {self.elo}")
+        elif mode == "pvp":
+            frame = Frame()
+            pygame.quit()
+            self.run()
 
     def run(self):
         self.main_menu.mainloop(self.surface)

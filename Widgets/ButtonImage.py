@@ -1,18 +1,26 @@
 import pygame
 import logging
 
-class ButtonImage():
-    def __init__(self, screen, x: int, y: int, image: pygame.Surface, scale: float) -> None:
-        self.screen = screen
-        width = image.get_width()
-        height = image.get_height()
-        self.image = pygame.transform.scale(image, (int(width * scale), int(height * scale)))
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-        self.clicked = False
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.__draw()
+import pygame
+import logging
 
+class ButtonImage:
+    def __init__(self, screen, x: int, y: int, image: pygame.Surface, scale: float = 1, initial_opacity: int = 255, over_opacity: int = 255) -> None:
+        self.screen = screen
+        self.original_image = image.convert_alpha()
+        width = self.original_image.get_width()
+        height = self.original_image.get_height()
+        self.scaled_size = (int(width * scale), int(height * scale))
+
+        self.image = pygame.transform.smoothscale(self.original_image, self.scaled_size)
+        self.initial_opacity = initial_opacity
+        self.over_opacity = over_opacity
+        self.opacity = initial_opacity
+        self.rect = self.image.get_rect(topleft=(x, y))
+
+        self.hovered = False
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.draw()  # draw initially
 
     def is_clicked(self, pos):
         if self.rect.collidepoint(pos):
@@ -20,11 +28,18 @@ class ButtonImage():
             return True
         return False
 
+    def update(self):
+        mouse_pos = pygame.mouse.get_pos()
+        hovered_now = self.rect.collidepoint(mouse_pos)
 
-    # draw button on screen
-    def __draw(self):
-        self.screen.blit(self.image, (self.rect.x, self.rect.y))
+        if hovered_now != self.hovered:
+            self.hovered = hovered_now
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND if self.hovered else pygame.SYSTEM_CURSOR_ARROW)
+            self.opacity = self.over_opacity if self.hovered else self.initial_opacity
+            self.draw()
 
-    def __get_mouse_position(self):
-        pos = pygame.mouse.get_pos()
-        return pos
+    def draw(self):
+        temp_image = pygame.transform.smoothscale(self.original_image, self.scaled_size).copy()
+        temp_image.set_alpha(self.opacity)
+        self.image = temp_image
+        self.screen.blit(self.image, self.rect.topleft)

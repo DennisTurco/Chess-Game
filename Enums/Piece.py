@@ -3,7 +3,7 @@ from enum import Enum
 class Color(Enum):
     WHITE = 'w'
     BLACK = 'b'
-    NONE = '--'  # Per celle vuote
+    NONE = '--'  # empty cell
 
 class PieceType(Enum):
     PAWN = 'p'
@@ -12,7 +12,7 @@ class PieceType(Enum):
     BISHOP = 'B'
     QUEEN = 'Q'
     KING = 'K'
-    EMPTY = '--'  # Per celle vuote
+    EMPTY = '--'  # empty cell
 
 class Piece(Enum):
     EMPTY = (Color.NONE, PieceType.EMPTY)

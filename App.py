@@ -1,6 +1,7 @@
 import logging
 import sys
 from Frame import Frame
+from Menu import Menu
 
 def configure_logger():
     logging.basicConfig(
@@ -10,7 +11,9 @@ def configure_logger():
 
 def main():
     configure_logger()
-    Frame()
+    # Frame()
+    menu = Menu()
+    menu.run()
 
 if __name__ == "__main__":
     try: main()

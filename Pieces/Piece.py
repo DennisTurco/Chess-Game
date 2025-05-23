@@ -1,6 +1,6 @@
 from Enums.Piece import PieceName, Color
+class Piece():
 
-class Piece:
     def __init__(self, board, is_white_turn) -> None:
         self.board = board
         self.is_white_turn = is_white_turn
@@ -45,3 +45,5 @@ class Piece:
                 self.possible_moves[i][j] = 1
             elif self.is_valid_capture(i, j):
                 self.possible_moves[i][j] = 2
+
+    

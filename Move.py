@@ -3,22 +3,8 @@ import sys
 import simpleaudio
 
 from MessageBox import MessageBox
-from Enums.Piece import Color, PieceName, PieceType
-from Pieces.Bishop import Bishop
-from Pieces.Rook import Rook
-from Pieces.King import King
-from Pieces.Knight import Knight
-from Pieces.Queen import Queen
-from Pieces.Pawn import Pawn
-
-PIECE_CLASS_MAP = {
-    PieceType.PAWN: Pawn,
-    PieceType.ROOK: Rook,
-    PieceType.BISHOP: Bishop,
-    PieceType.KNIGHT: Knight,
-    PieceType.QUEEN: Queen,
-    PieceType.KING: King
-}
+from Enums.Piece import Color, PieceName
+from Pieces.PieceClassMap import PieceClassMap
 
 class Move():
 
@@ -139,7 +125,7 @@ class Move():
 
     def __checkPossibleMoveByPieceType(self, type, posxy):
         try:
-            piece_class = PIECE_CLASS_MAP[type]
+            piece_class = PieceClassMap.MAP[type]
             piece = piece_class(self.__board, self.__whiteMove)
             piece.generate_moves(posxy)
             self.__possibleMovements = piece.get_possible_moves()

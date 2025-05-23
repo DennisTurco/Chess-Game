@@ -1,8 +1,6 @@
 import logging
 import sys
-from Frame import Frame
-from Menu import Menu
-
+from GameManager import GameManager
 def configure_logger():
     logging.basicConfig(
         level=logging.DEBUG,
@@ -11,9 +9,7 @@ def configure_logger():
 
 def main():
     configure_logger()
-    # Frame()
-    menu = Menu()
-    menu.run()
+    GameManager().run()
 
 if __name__ == "__main__":
     try: main()

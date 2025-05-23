@@ -1,3 +1,7 @@
+import pygame
+from Menu import Menu
+from Frame import Frame
+
 APP_NAME = "Chess Game"
 SIDEBAR_WIDTH = 220
 WIDTH = 512
@@ -5,3 +9,26 @@ HEIGHT = 512
 WINDOW_WIDTH = WIDTH + SIDEBAR_WIDTH
 DIMENSION = 8   # dimension for chess board is 8x8
 SQ_SIZE = HEIGHT // DIMENSION   # square size
+
+class GameManager():
+    def __init__(self):
+        pygame.init()
+        self.surface = pygame.display.set_mode((WINDOW_WIDTH, HEIGHT))
+        pygame.display.set_caption(APP_NAME)
+
+    def run(self):
+        running = True
+        while running:
+            menu = Menu()
+            mode, elo = menu.mainloop(self.surface)
+
+            if mode is None:
+                running = False
+                continue
+
+            if mode == "pvp":
+                Frame()
+            elif mode == "ai":
+                pass
+
+        pygame.quit()

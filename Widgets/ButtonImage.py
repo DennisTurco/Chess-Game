@@ -24,7 +24,7 @@ class ButtonImage:
 
     def is_clicked(self, pos):
         if self.rect.collidepoint(pos):
-            self.logger.info("Resetting the game")
+            self.logger.info("Button image clicked")
             return True
         return False
 

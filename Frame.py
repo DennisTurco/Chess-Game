@@ -38,11 +38,11 @@ class Frame:
         running = True
         self.buttons = self.draw_buttons(screen)
 
-
         while running:
             screen.fill(pygame.Color('white'))
-            self.buttons["reset"].update()  # aggiorna stato (hover, opacità)
-            self.buttons["reset"].draw()    # ridisegna con la nuova opacità
+
+            self.refresh(screen, board, possiblePositions, move_history)
+            self.buttons = self.draw_buttons(screen)
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -57,8 +57,11 @@ class Frame:
                         move_history.clear()
                         playerClicks = PosMove()
                         possiblePositions = move.reset_posssible_positions()
-                        self.refresh(screen, board, possiblePositions, move_history)
                         continue
+
+                    if self.buttons["menu"].is_clicked(pos):
+                        running = False
+                        return
 
                     if pos[0] < SIDEBAR_WIDTH:
                         continue
@@ -101,7 +104,7 @@ class Frame:
                         # reset possiblePositions
                         playerClicks = PosMove()
                         possiblePositions = move.reset_posssible_positions()
-                self.buttons["reset"].update()
+                # self.buttons["reset"].update()
                 self.refresh(screen, board, possiblePositions, move_history)
 
 
@@ -161,12 +164,18 @@ class Frame:
 
 
     def draw_buttons(self, screen):
-        if hasattr(self, "buttons") and "reset" in self.buttons:
-            return self.buttons
+        if not hasattr(self, "buttons"):
+            image_restart = pygame.image.load("images/reset.png").convert_alpha()
+            image_menu = pygame.image.load("images/reset.png").convert_alpha()
+            reset_button = ButtonImage(screen, 10, 400, image_restart, 0.08, 180, 255)
+            menu_button = ButtonImage(screen, 10, 450, image_menu, 0.08, 180, 255)
+            self.buttons = {"reset": reset_button, "menu": menu_button}
 
-        image_restart = pygame.image.load("images/reset.png").convert_alpha()
-        reset_button = ButtonImage(screen, 10, 50, image_restart, 0.08, 180, 255)
-        self.buttons = {"reset": reset_button}
+        self.buttons["reset"].update()
+        self.buttons["reset"].draw()
+        self.buttons["menu"].update()
+        self.buttons["menu"].draw()
+
         return self.buttons
 
 
@@ -182,9 +191,9 @@ class Frame:
 
         # history moves
         label = small_font.render("Moves:", True, pygame.Color("black"))
-        screen.blit(label, (10, 100))
+        screen.blit(label, (10, 40))
 
-        y_offset = 130
+        y_offset = 70
         for i, move in enumerate(move_history[-20:]):  # show only the last 20 moves
             text = small_font.render(move, True, pygame.Color("black"))
             screen.blit(text, (10, y_offset + i * 18))
@@ -192,6 +201,9 @@ class Frame:
         if "reset" in self.buttons:
             self.buttons["reset"].update()
             self.buttons["reset"].draw()
+        if "menu" in self.buttons:
+            self.buttons["menu"].update()
+            self.buttons["menu"].draw()
 
 
     def drawHighlight(self, screen, possiblePositions):

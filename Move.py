@@ -9,9 +9,10 @@ from Pieces.PieceClassMap import PieceClassMap
 
 class Move():
 
-    def __init__(self, playerClicks, board):
+    def __init__(self, playerClicks, board, screen):
         self.__playerClicks = playerClicks
         self.__board = board
+        self.__screen = screen
         self.__whiteMove = True
         self.__finished = False
         self.__blackKingCastling = True
@@ -171,11 +172,13 @@ class Move():
         if not blackKing or not whiteKing:
             self.__finished = True
             messageBox = MessageBox()
-            if not whiteKing: messageBox.setWinner(False) # white is winner
-            else: messageBox.setWinner(True) # black is winner
+            if not whiteKing:
+                restart = messageBox.ask_restart(False, self.__screen) # white is winner
+            else:
+                restart = messageBox.ask_restart(True, self.__screen) # black is winner
 
             # check for restart
-            if messageBox.getRestartResponse():
+            if restart:
                 self.resetGame()
 
         return self.__finished

@@ -1,6 +1,6 @@
 import pygame
 from Menu import Menu
-from Frame import Frame
+from Game import Game
 
 APP_NAME = "Chess Game"
 SIDEBAR_WIDTH = 220
@@ -27,7 +27,7 @@ class GameManager():
                 continue
 
             if mode == "pvp":
-                Frame()
+                Game()
             elif mode == "ai":
                 pass
 

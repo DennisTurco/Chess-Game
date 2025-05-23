@@ -9,7 +9,10 @@ class Menu:
         self.mode = None
         self.elo = 1200
 
-        self.main_menu = pygame_menu.Menu('Welcome to Chess Game', GameManager.WINDOW_WIDTH, GameManager.HEIGHT, theme=themes.THEME_SOLARIZED)
+        programIcon = pygame.image.load('images/wK.png')
+        pygame.display.set_icon(programIcon)
+
+        self.main_menu = pygame_menu.Menu(f'Welcome to {GameManager.APP_NAME}', GameManager.WINDOW_WIDTH, GameManager.HEIGHT, theme=themes.THEME_SOLARIZED)
         self.mode_menu = pygame_menu.Menu('Modes', GameManager.WINDOW_WIDTH, GameManager.HEIGHT, theme=themes.THEME_SOLARIZED)
 
         self.mode_menu.add.button('Player vs Player', self.select_pvp)

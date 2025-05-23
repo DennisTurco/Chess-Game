@@ -7,7 +7,7 @@ This is a chess game made with python.
 ## Installation
 
 For install the game you have to download the whole project and run it with python compiler:
-`python frame.py`
+`python Game.py`
 
 ## Demo
 
@@ -17,6 +17,9 @@ For install the game you have to download the whole project and run it with pyth
 
 ![Capture2](https://user-images.githubusercontent.com/57963761/230503247-59ca99c9-90ac-4245-aa7c-3facc848d99e.PNG)
 
+# Tecnical info
+* Menu created with: **[pygame-menu](https://pygame-menu.readthedocs.io/en/latest/_source/create_menu.html)**
+* Game created with: **pygame**
 
 ## Licence
 

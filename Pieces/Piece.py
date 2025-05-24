@@ -1,4 +1,5 @@
 from Enums.Piece import PieceName, Color
+
 class Piece():
 
     def __init__(self, board, is_white_turn) -> None:

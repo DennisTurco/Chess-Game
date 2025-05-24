@@ -1,4 +1,3 @@
-from Enums.Piece import Color, PieceName
 from Pieces.Piece import Piece
 
 class Rook(Piece):

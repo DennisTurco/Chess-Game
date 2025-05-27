@@ -1,7 +1,6 @@
 import pygame
 import pygame_menu
 from Enums.Piece import PieceType
-from GameManager import WINDOW_WIDTH, HEIGHT
 from Menus.Menu import Menu
 
 class PromotionMenu(Menu):
@@ -11,8 +10,8 @@ class PromotionMenu(Menu):
 
         self.menu = pygame_menu.Menu(
             title='Choose Promotion',
-            width=WINDOW_WIDTH,
-            height=HEIGHT,
+            width=self.WIDTH,
+            height=self.HEIGHT,
             theme=self.custom_theme
         )
 

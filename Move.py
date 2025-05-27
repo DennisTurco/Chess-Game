@@ -6,6 +6,7 @@ import pygame
 from Board import Board
 from Entities.Pos import Pos
 from Entities.PosMove import PosMove
+from Menus.PromotionMenu import PromotionMenu
 from Menus.MessageBox import MessageBox
 from Enums.Piece import Color, PieceName, PieceType
 from Pieces.PieceClassMap import PieceClassMap
@@ -52,7 +53,11 @@ class Move():
 
         self.__initPossiblePositions()
 
-        self.__board[self.__playerClicks.final_position.x][self.__playerClicks.final_position.y] = self.getCurrentPieceName()
+        current_piece = self.getCurrentPieceName()
+
+        current_piece = self.__check_and_get_promotion(current_piece)
+
+        self.__board[self.__playerClicks.final_position.x][self.__playerClicks.final_position.y] = current_piece
         self.__board[self.__playerClicks.initial_position.x][self.__playerClicks.initial_position.y] = PieceName.EMPTY
 
         # change turn
@@ -60,6 +65,17 @@ class Move():
 
         self.__printMatrix(self.__board)
 
+    def __check_and_get_promotion(self, current_piece: PieceName) -> PieceName:
+        if current_piece.type != PieceType.PAWN:
+            return current_piece
+
+        if current_piece.color == Color.BLACK and self.__playerClicks.final_position.y == 7:
+            type = PromotionMenu().show(self.__screen)
+            current_piece = PieceName.from_string(Color.BLACK.value + type)
+        elif current_piece.color == Color.WHITE and self.__playerClicks.final_position.y == 0:
+            type = PromotionMenu().show(self.__screen)
+            current_piece = PieceName.from_string(Color.WHITE.value + type)
+        return current_piece
 
     # check if it is a simple move or someone is capturing a piece to play the correct sound
     def __playSound(self) -> None:

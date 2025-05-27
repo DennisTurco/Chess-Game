@@ -1,34 +1,30 @@
 import pygame
 import pygame_menu
-from pygame_menu import themes, events
+from pygame_menu import events
 
+from Menus.Menu import Menu
 import GameManager
 
-class Menu:
+class MainMenu(Menu):
     def __init__(self):
+        super().__init__()
         self.mode = None
         self.elo = 1200
-
-        custom_theme = themes.THEME_SOLARIZED.copy()
-        custom_theme.title_font = pygame_menu.font.FONT_MUNRO
-        custom_theme.widget_font = pygame_menu.font.FONT_MUNRO
-        custom_theme.title_font_size = 60
-        custom_theme.widget_font_size = 35
 
         programIcon = pygame.image.load('images/wK.png')
         pygame.display.set_icon(programIcon)
 
         self.main_menu = pygame_menu.Menu(
             title=f'Welcome to {GameManager.APP_NAME}',
-            width=GameManager.WINDOW_WIDTH,
-            height=GameManager.HEIGHT,
-            theme=custom_theme
+            width=self.WIDTH,
+            height=self.HEIGHT,
+            theme=self.custom_theme
         )
         self.mode_menu = pygame_menu.Menu(
             title='Modes',
-            width=GameManager.WINDOW_WIDTH,
-            height=GameManager.HEIGHT,
-            theme=custom_theme
+            width=self.WIDTH,
+            height=self.HEIGHT,
+            theme=self.custom_theme
         )
 
         self.mode_menu.add.button('Player vs Player', self.select_pvp)
@@ -37,9 +33,9 @@ class Menu:
 
         self.elo_select_menu = pygame_menu.Menu(
             title='Select AI Difficulty (ELO)',
-            width=GameManager.WINDOW_WIDTH,
-            height=GameManager.HEIGHT,
-            theme=custom_theme
+            width=self.WIDTH,
+            height=self.HEIGHT,
+            theme=self.custom_theme
         )
         self.elo_select_menu.add.selector('ELO level:', [
             ('400', 400), ('600', 600), ('800', 800), ('1000', 1000), ('1200', 1200), ('1500', 1500),

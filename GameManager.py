@@ -1,5 +1,5 @@
 import pygame
-from Menu import Menu
+from Menus.MainMenu import MainMenu
 from Game import Game
 
 APP_NAME = "Chess Game"
@@ -19,7 +19,7 @@ class GameManager():
     def run(self) -> None:
         running = True
         while running:
-            menu = Menu()
+            menu = MainMenu()
             mode, elo = menu.mainloop(self.surface)
 
             if mode is None:

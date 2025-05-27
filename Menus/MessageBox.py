@@ -1,10 +1,10 @@
 import pygame
 import pygame_menu
-from pygame_menu import themes
-import GameManager
+from Menus.Menu import Menu
 
-class MessageBox:
+class MessageBox(Menu):
     def __init__(self):
+        super().__init__()
         self.__whiteWin = "White has won the game!"
         self.__blackWin = "Black has won the game!"
         self.__question = "Would you like to restart the game?"
@@ -28,7 +28,12 @@ class MessageBox:
             restart = False
             menu.disable()
 
-        menu = pygame_menu.Menu(self.__titleMessage, GameManager.WINDOW_WIDTH, GameManager.HEIGHT, theme=themes.THEME_SOLARIZED)
+        menu = pygame_menu.Menu(
+            title=self.__titleMessage,
+            width=self.WIDTH,
+            height=self.HEIGHT,
+            theme=self.custom_theme
+        )
         menu.add.label(message, max_char=-1, font_size=20)
         menu.add.button('Yes', on_yes)
         menu.add.button('No', on_no)

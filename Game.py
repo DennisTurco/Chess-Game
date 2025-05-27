@@ -1,7 +1,6 @@
 import pygame
 import logging
 import sys
-from pygame_menu.font import FONT_MUNRO
 import pygame_menu.font as font_module
 
 from Board import Board

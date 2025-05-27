@@ -6,7 +6,7 @@ import pygame
 from Board import Board
 from Entities.Pos import Pos
 from Entities.PosMove import PosMove
-from MessageBox import MessageBox
+from Menus.MessageBox import MessageBox
 from Enums.Piece import Color, PieceName, PieceType
 from Pieces.PieceClassMap import PieceClassMap
 

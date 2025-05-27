@@ -1,6 +1,7 @@
 import pygame
 import logging
 import sys
+import pygame_menu.font as font_module
 
 from Board import Board
 from Move import Move
@@ -14,11 +15,18 @@ import GameManager
 class Game:
 
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+
         self.IMAGES = {}
+
+        self.font_path = font_module.FONT_MUNRO
+        self.normal_text = pygame.font.Font(self.font_path, 20)
+        self.bold_text = pygame.font.SysFont(self.font_path, 35, bold=True)
+
         self.game()
 
 
-    def game(self):
+    def game(self) -> None:
         screen = self.init_and_get_window()
 
         playerClicks: PosMove = PosMove()
@@ -60,7 +68,7 @@ class Game:
                     board_y = pos[1] // GameManager.SQ_SIZE
                     posxy: Pos = Pos(board_x, board_y)
 
-                    logging.debug(f"position clicked = {posxy}")
+                    self.logger.debug(f"position clicked = {posxy}")
 
                     # check if is a piece
                     if board.board[posxy.x][posxy.y] != PieceName.EMPTY:
@@ -79,7 +87,7 @@ class Game:
                             if move.captureRequest(playerClicks):
                                 move_notation = f"{chr(65 + playerClicks.initial_position.x)}{8 - playerClicks.initial_position.y} -> {chr(65 + playerClicks.final_position.x)}{8 - playerClicks.final_position.y}"
                                 move_history.append(move_notation)
-                                logging.info(f"Moving piece from {playerClicks.initial_position} to {playerClicks.final_position}")
+                                self.logger.info(f"Moving piece from {playerClicks.initial_position} to {playerClicks.final_position}")
                             # reset possiblePositions
                             playerClicks = PosMove()
                             possiblePositions = move.reset_posssible_positions()
@@ -90,7 +98,7 @@ class Game:
                         if move.moveRequest(playerClicks):
                             move_notation = f"{chr(65 + playerClicks.initial_position.x)}{8 - playerClicks.initial_position.y} -> {chr(65 + playerClicks.final_position.x)}{8 - playerClicks.final_position.y}"
                             move_history.append(move_notation)
-                            logging.info(f"Moving piece from {playerClicks.initial_position} to {playerClicks.final_position}")
+                            self.logger.info(f"Moving piece from {playerClicks.initial_position} to {playerClicks.final_position}")
                         # reset possiblePositions
                         playerClicks = PosMove()
                         possiblePositions = move.reset_posssible_positions()
@@ -105,7 +113,7 @@ class Game:
                 self.refresh(screen, board, possiblePositions, move_history)
 
 
-    def restart_game(self, screen, move_history):
+    def restart_game(self, screen: pygame.Surface, move_history: list):
         board = Board()
         move = Move(PosMove(), board.board, screen)
         move_history.clear()
@@ -121,7 +129,7 @@ class Game:
             try:
                 self.IMAGES[piece] = pygame.transform.scale(pygame.image.load(image), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
             except:
-                logging.error(f"{sys.argv[0]} -> error on loading image")
+                self.logger.error(f"{sys.argv[0]} -> error on loading image")
 
 
     def init_and_get_window(self) -> pygame.Surface:
@@ -134,21 +142,20 @@ class Game:
         return screen
 
 
-    def refresh(self, screen, board, possiblePositions, move_history):
+    def refresh(self, screen: pygame.Surface, board: Board, possiblePositions: list[list[int]], move_history: list) -> None:
         self.drawGameState(screen, board.board, possiblePositions, move_history)
         pygame.display.flip()
 
 
-    def drawGameState(self, screen, board, possiblePositions, move_history):
+    def drawGameState(self, screen: pygame.Surface, board: Board, possiblePositions: list[list[int]], move_history: list) -> None:
         self.drawSidebar(screen, move_history)
         self.drawBoard(screen)
         self.drawHighlight(screen, possiblePositions)
         self.drawPieces(screen, board)
 
 
-    def drawBoard(self, screen):
+    def drawBoard(self, screen: pygame.Surface) -> None:
         colors = [pygame.Color('white'), pygame.Color('gray')]
-        font = pygame.font.SysFont("Arial", 16)
 
         for i in range(GameManager.DIMENSION):
             for j in range(GameManager.DIMENSION):
@@ -159,16 +166,16 @@ class Game:
 
                 # numbers to the left
                 if i == 0:
-                    text = font.render(str(8 - j), True, pygame.Color('black'))
+                    text = self.normal_text.render(str(8 - j), False, pygame.Color('black'))
                     screen.blit(text, (GameManager.SIDEBAR_WIDTH - 18, y + 4))
 
                 # letters down
                 if j == 7:
-                    text = font.render(chr(65 + i), True, pygame.Color('black'))
+                    text = self.normal_text.render(chr(65 + i), False, pygame.Color('black'))
                     screen.blit(text, (x + GameManager.SQ_SIZE // 2 - 6, GameManager.HEIGHT - 20))
 
 
-    def draw_buttons(self, screen):
+    def draw_buttons(self, screen: pygame.Surface):
         if not hasattr(self, "buttons"):
             image_restart = pygame.image.load("images/reset.png").convert_alpha()
             image_menu = pygame.image.load("images/reset.png").convert_alpha()
@@ -184,23 +191,20 @@ class Game:
         return self.buttons
 
 
-    def drawSidebar(self, screen, move_history):
+    def drawSidebar(self, screen: pygame.Surface, move_history: list) -> None:
         pygame.draw.rect(screen, pygame.Color("lightgray"), pygame.Rect(0, 0, GameManager.SIDEBAR_WIDTH, GameManager.HEIGHT))
 
-        font = pygame.font.SysFont("Arial", 20, bold=True)
-        small_font = pygame.font.SysFont("Arial", 16)
-
         # app name
-        title = font.render(GameManager.APP_NAME, True, pygame.Color("black"))
+        title = self.bold_text.render(GameManager.APP_NAME, False, pygame.Color("black"))
         screen.blit(title, (10, 10))
 
         # history moves
-        label = small_font.render("Moves:", True, pygame.Color("black"))
+        label = self.normal_text.render("Moves:", False, pygame.Color("black"))
         screen.blit(label, (10, 40))
 
         y_offset = 70
         for i, move in enumerate(move_history[-15:]):  # show only the last 15 moves
-            text = small_font.render(move, True, pygame.Color("black"))
+            text = self.normal_text.render(move, False, pygame.Color("black"))
             screen.blit(text, (10, y_offset + i * 18))
 
         if "reset" in self.buttons:
@@ -211,7 +215,7 @@ class Game:
             self.buttons["menu"].draw()
 
 
-    def drawHighlight(self, screen, possiblePositions):
+    def drawHighlight(self, screen: pygame.Surface, possiblePositions: list[list[int]]) -> None:
         if possiblePositions == [[],[]]: return
         image_dot = pygame.transform.scale(pygame.image.load("images/black_dot.png"), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
         image_circle = pygame.transform.scale(pygame.image.load("images/black_circle.png"), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
@@ -227,7 +231,7 @@ class Game:
                     screen.blit(image_circle, pygame.Rect(x, y, GameManager.SQ_SIZE, GameManager.SQ_SIZE))
 
 
-    def drawPieces(self, screen, board):
+    def drawPieces(self, screen: pygame.Surface, board: Board) -> None:
         for i in range(GameManager.DIMENSION):
             for j in range(GameManager.DIMENSION):
                 if board[i][j] != PieceName.EMPTY:
@@ -237,4 +241,4 @@ class Game:
                         y = j * GameManager.SQ_SIZE
                         screen.blit(self.IMAGES[piece], pygame.Rect(x, y, GameManager.SQ_SIZE, GameManager.SQ_SIZE))
                     except:
-                        logging.error(f"{sys.argv[0]} -> cannot load piece '{piece}' into the board")
+                        self.logger.error(f"{sys.argv[0]} -> cannot load piece '{piece}' into the board")

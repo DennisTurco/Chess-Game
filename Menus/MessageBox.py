@@ -1,16 +1,19 @@
+import logging
+import pygame
 import pygame_menu
-from pygame_menu import themes
-import GameManager
+from Menus.Menu import Menu
 
-class MessageBox:
+class MessageBox(Menu):
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.info("Opening game over message")
+        super().__init__()
         self.__whiteWin = "White has won the game!"
         self.__blackWin = "Black has won the game!"
         self.__question = "Would you like to restart the game?"
         self.__titleMessage = "Game Over"
 
-    def ask_restart(self, isWhite, screen):
-        import pygame
+    def ask_restart(self, isWhite: bool, screen: pygame.Surface) -> bool | None:
         if not pygame.get_init():
             pygame.init()
 
@@ -28,7 +31,12 @@ class MessageBox:
             restart = False
             menu.disable()
 
-        menu = pygame_menu.Menu(self.__titleMessage, GameManager.WINDOW_WIDTH, GameManager.HEIGHT, theme=themes.THEME_SOLARIZED)
+        menu = pygame_menu.Menu(
+            title=self.__titleMessage,
+            width=self.WIDTH,
+            height=self.HEIGHT,
+            theme=self.custom_theme
+        )
         menu.add.label(message, max_char=-1, font_size=20)
         menu.add.button('Yes', on_yes)
         menu.add.button('No', on_no)
@@ -50,4 +58,5 @@ class MessageBox:
 
             clock.tick(60)
 
+        self.logger.info(f"Restart setted to {restart}")
         return restart

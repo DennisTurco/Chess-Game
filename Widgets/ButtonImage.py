@@ -4,8 +4,10 @@ import logging
 import pygame
 import logging
 
+from Entities.Pos import Pos
+
 class ButtonImage:
-    def __init__(self, screen, x: int, y: int, image: pygame.Surface, scale: float = 1, initial_opacity: int = 255, over_opacity: int = 255) -> None:
+    def __init__(self, screen: pygame.Surface, x: int, y: int, image: pygame.Surface, scale: float = 1, initial_opacity: int = 255, over_opacity: int = 255) -> None:
         self.screen = screen
         self.original_image = image.convert_alpha()
         width = self.original_image.get_width()
@@ -22,13 +24,13 @@ class ButtonImage:
         self.logger = logging.getLogger(self.__class__.__name__)
         self.draw()  # draw initially
 
-    def is_clicked(self, pos):
+    def is_clicked(self, pos: Pos) -> bool:
         if self.rect.collidepoint(pos):
             self.logger.info("Button image clicked")
             return True
         return False
 
-    def update(self):
+    def update(self) -> None:
         mouse_pos = pygame.mouse.get_pos()
         hovered_now = self.rect.collidepoint(mouse_pos)
 
@@ -38,7 +40,7 @@ class ButtonImage:
             self.opacity = self.over_opacity if self.hovered else self.initial_opacity
             self.draw()
 
-    def draw(self):
+    def draw(self) -> None:
         temp_image = pygame.transform.smoothscale(self.original_image, self.scaled_size).copy()
         temp_image.set_alpha(self.opacity)
         self.image = temp_image

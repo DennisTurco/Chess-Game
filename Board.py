@@ -2,6 +2,7 @@ import copy
 from Enums.Piece import PieceName
 
 class Board():
+
     def __init__(self):
         self.board = [
             [PieceName.BLACK_ROOK, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_ROOK],
@@ -15,5 +16,5 @@ class Board():
         ]
         self.startBoard = copy.deepcopy(self.board)
 
-    def restartBoard(self):
+    def restartBoard(self) -> None:
         self.board = copy.deepcopy(self.startBoard) # to reset competly the board

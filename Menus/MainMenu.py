@@ -1,25 +1,44 @@
+import logging
 import pygame
 import pygame_menu
-from pygame_menu import themes, events
+from pygame_menu import events
 
+from Menus.Menu import Menu
 import GameManager
 
-class Menu:
+class MainMenu(Menu):
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+        super().__init__()
         self.mode = None
         self.elo = 1200
 
         programIcon = pygame.image.load('images/wK.png')
         pygame.display.set_icon(programIcon)
 
-        self.main_menu = pygame_menu.Menu(f'Welcome to {GameManager.APP_NAME}', GameManager.WINDOW_WIDTH, GameManager.HEIGHT, theme=themes.THEME_SOLARIZED)
-        self.mode_menu = pygame_menu.Menu('Modes', GameManager.WINDOW_WIDTH, GameManager.HEIGHT, theme=themes.THEME_SOLARIZED)
+        self.main_menu = pygame_menu.Menu(
+            title=f'Welcome to {GameManager.APP_NAME}',
+            width=self.WIDTH,
+            height=self.HEIGHT,
+            theme=self.custom_theme
+        )
+        self.mode_menu = pygame_menu.Menu(
+            title='Modes',
+            width=self.WIDTH,
+            height=self.HEIGHT,
+            theme=self.custom_theme
+        )
 
         self.mode_menu.add.button('Player vs Player', self.select_pvp)
         self.mode_menu.add.button('Player vs AI', self.elo_menu)
         self.mode_menu.add.button('Back', events.BACK)
 
-        self.elo_select_menu = pygame_menu.Menu('Select AI Difficulty (ELO)', GameManager.WINDOW_WIDTH, GameManager.HEIGHT, theme=themes.THEME_SOLARIZED)
+        self.elo_select_menu = pygame_menu.Menu(
+            title='Select AI Difficulty (ELO)',
+            width=self.WIDTH,
+            height=self.HEIGHT,
+            theme=self.custom_theme
+        )
         self.elo_select_menu.add.selector('ELO level:', [
             ('400', 400), ('600', 600), ('800', 800), ('1000', 1000), ('1200', 1200), ('1500', 1500),
             ('1800', 1800), ('2000', 2000), ('2200', 2200), ('2500', 2500),
@@ -33,21 +52,23 @@ class Menu:
 
         self.surface = None
 
-    def set_elo(self, selected, value):
+    def set_elo(self, selected, value: int) -> None:
         self.elo = value
 
-    def elo_menu(self):
+    def elo_menu(self) -> None:
         self.elo_select_menu.mainloop(self.surface)
 
-    def select_pvp(self):
+    def select_pvp(self) -> None:
+        self.logger.info("Mode selected: Player vs Player")
         self.mode = "pvp"
         self.main_menu.disable()
 
-    def select_ai(self):
+    def select_ai(self) -> None:
+        self.logger.info("Mode selected: Player vs AI")
         self.mode = "ai"
         self.elo_select_menu.disable()
 
-    def mainloop(self, surface):
+    def mainloop(self, surface: pygame.Surface) -> tuple[str | None, int]:
         self.surface = surface
         self.main_menu.mainloop(surface)
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)

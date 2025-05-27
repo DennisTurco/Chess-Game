@@ -29,17 +29,17 @@ class PieceName(Enum):
     BLACK_QUEEN = (Color.BLACK, PieceType.QUEEN)
     BLACK_KING = (Color.BLACK, PieceType.KING)
 
-    def __init__(self, color, type_):
+    def __init__(self, color: Color, type_: PieceType):
         self.color = color
         self.type = type_
 
-    def __str__(self):
+    def __str__(self) -> str:
         if self == PieceName.EMPTY:
             return '--'
         return self.color.value + self.type.value
 
     @staticmethod
-    def from_string(s):
+    def from_string(s) -> 'PieceName':
         if s == '--':
             return PieceName.EMPTY
         color = Color(s[0])

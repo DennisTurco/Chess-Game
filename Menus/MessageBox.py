@@ -1,9 +1,12 @@
+import logging
 import pygame
 import pygame_menu
 from Menus.Menu import Menu
 
 class MessageBox(Menu):
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+        self.logger.info("Opening game over message")
         super().__init__()
         self.__whiteWin = "White has won the game!"
         self.__blackWin = "Black has won the game!"
@@ -55,4 +58,5 @@ class MessageBox(Menu):
 
             clock.tick(60)
 
+        self.logger.info(f"Restart setted to {restart}")
         return restart

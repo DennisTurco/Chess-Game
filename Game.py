@@ -15,6 +15,8 @@ import GameManager
 class Game:
 
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
+
         self.IMAGES = {}
 
         self.font_path = font_module.FONT_MUNRO
@@ -66,7 +68,7 @@ class Game:
                     board_y = pos[1] // GameManager.SQ_SIZE
                     posxy: Pos = Pos(board_x, board_y)
 
-                    logging.debug(f"position clicked = {posxy}")
+                    self.logger.debug(f"position clicked = {posxy}")
 
                     # check if is a piece
                     if board.board[posxy.x][posxy.y] != PieceName.EMPTY:
@@ -85,7 +87,7 @@ class Game:
                             if move.captureRequest(playerClicks):
                                 move_notation = f"{chr(65 + playerClicks.initial_position.x)}{8 - playerClicks.initial_position.y} -> {chr(65 + playerClicks.final_position.x)}{8 - playerClicks.final_position.y}"
                                 move_history.append(move_notation)
-                                logging.info(f"Moving piece from {playerClicks.initial_position} to {playerClicks.final_position}")
+                                self.logger.info(f"Moving piece from {playerClicks.initial_position} to {playerClicks.final_position}")
                             # reset possiblePositions
                             playerClicks = PosMove()
                             possiblePositions = move.reset_posssible_positions()
@@ -96,7 +98,7 @@ class Game:
                         if move.moveRequest(playerClicks):
                             move_notation = f"{chr(65 + playerClicks.initial_position.x)}{8 - playerClicks.initial_position.y} -> {chr(65 + playerClicks.final_position.x)}{8 - playerClicks.final_position.y}"
                             move_history.append(move_notation)
-                            logging.info(f"Moving piece from {playerClicks.initial_position} to {playerClicks.final_position}")
+                            self.logger.info(f"Moving piece from {playerClicks.initial_position} to {playerClicks.final_position}")
                         # reset possiblePositions
                         playerClicks = PosMove()
                         possiblePositions = move.reset_posssible_positions()
@@ -127,7 +129,7 @@ class Game:
             try:
                 self.IMAGES[piece] = pygame.transform.scale(pygame.image.load(image), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
             except:
-                logging.error(f"{sys.argv[0]} -> error on loading image")
+                self.logger.error(f"{sys.argv[0]} -> error on loading image")
 
 
     def init_and_get_window(self) -> pygame.Surface:
@@ -239,4 +241,4 @@ class Game:
                         y = j * GameManager.SQ_SIZE
                         screen.blit(self.IMAGES[piece], pygame.Rect(x, y, GameManager.SQ_SIZE, GameManager.SQ_SIZE))
                     except:
-                        logging.error(f"{sys.argv[0]} -> cannot load piece '{piece}' into the board")
+                        self.logger.error(f"{sys.argv[0]} -> cannot load piece '{piece}' into the board")

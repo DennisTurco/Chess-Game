@@ -14,6 +14,7 @@ from Pieces.PieceClassMap import PieceClassMap
 class Move():
 
     def __init__(self, playerClicks: PosMove, board: Board, screen: pygame.Surface):
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.__playerClicks = playerClicks
         self.__board = board
         self.__screen = screen
@@ -28,8 +29,6 @@ class Move():
         self.__sound_capture = pygame.mixer.Sound("sounds/capture.wav")
 
         self.__initPossiblePositions()
-
-        self.logger = logging.getLogger(self.__class__.__name__)
 
     def __initPossiblePositions(self) -> None:
         self.__possibleMovements = [[0 for x in range(len(self.__board))] for y in range(len(self.__board))] # create a matrix 8 x 8 full with '0'

@@ -1,3 +1,4 @@
+import logging
 import pygame
 import pygame_menu
 from pygame_menu import events
@@ -7,6 +8,7 @@ import GameManager
 
 class MainMenu(Menu):
     def __init__(self):
+        self.logger = logging.getLogger(self.__class__.__name__)
         super().__init__()
         self.mode = None
         self.elo = 1200
@@ -57,10 +59,12 @@ class MainMenu(Menu):
         self.elo_select_menu.mainloop(self.surface)
 
     def select_pvp(self) -> None:
+        self.logger.info("Mode selected: Player vs Player")
         self.mode = "pvp"
         self.main_menu.disable()
 
     def select_ai(self) -> None:
+        self.logger.info("Mode selected: Player vs AI")
         self.mode = "ai"
         self.elo_select_menu.disable()
 

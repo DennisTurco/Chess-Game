@@ -16,7 +16,7 @@ class GameManager():
         self.surface = pygame.display.set_mode((WINDOW_WIDTH, HEIGHT))
         pygame.display.set_caption(APP_NAME)
 
-    def run(self):
+    def run(self) -> None:
         running = True
         while running:
             menu = Menu()

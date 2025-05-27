@@ -18,7 +18,7 @@ class Game:
         self.game()
 
 
-    def game(self):
+    def game(self) -> None:
         screen = self.init_and_get_window()
 
         playerClicks: PosMove = PosMove()
@@ -105,7 +105,7 @@ class Game:
                 self.refresh(screen, board, possiblePositions, move_history)
 
 
-    def restart_game(self, screen, move_history):
+    def restart_game(self, screen: pygame.Surface, move_history: list):
         board = Board()
         move = Move(PosMove(), board.board, screen)
         move_history.clear()
@@ -134,19 +134,19 @@ class Game:
         return screen
 
 
-    def refresh(self, screen, board, possiblePositions, move_history):
+    def refresh(self, screen: pygame.Surface, board: Board, possiblePositions: list[list[int]], move_history: list) -> None:
         self.drawGameState(screen, board.board, possiblePositions, move_history)
         pygame.display.flip()
 
 
-    def drawGameState(self, screen, board, possiblePositions, move_history):
+    def drawGameState(self, screen: pygame.Surface, board: Board, possiblePositions: list[list[int]], move_history: list) -> None:
         self.drawSidebar(screen, move_history)
         self.drawBoard(screen)
         self.drawHighlight(screen, possiblePositions)
         self.drawPieces(screen, board)
 
 
-    def drawBoard(self, screen):
+    def drawBoard(self, screen: pygame.Surface) -> None:
         colors = [pygame.Color('white'), pygame.Color('gray')]
         font = pygame.font.SysFont("Arial", 16)
 
@@ -168,7 +168,7 @@ class Game:
                     screen.blit(text, (x + GameManager.SQ_SIZE // 2 - 6, GameManager.HEIGHT - 20))
 
 
-    def draw_buttons(self, screen):
+    def draw_buttons(self, screen: pygame.Surface):
         if not hasattr(self, "buttons"):
             image_restart = pygame.image.load("images/reset.png").convert_alpha()
             image_menu = pygame.image.load("images/reset.png").convert_alpha()
@@ -184,7 +184,7 @@ class Game:
         return self.buttons
 
 
-    def drawSidebar(self, screen, move_history):
+    def drawSidebar(self, screen: pygame.Surface, move_history: list) -> None:
         pygame.draw.rect(screen, pygame.Color("lightgray"), pygame.Rect(0, 0, GameManager.SIDEBAR_WIDTH, GameManager.HEIGHT))
 
         font = pygame.font.SysFont("Arial", 20, bold=True)
@@ -211,7 +211,7 @@ class Game:
             self.buttons["menu"].draw()
 
 
-    def drawHighlight(self, screen, possiblePositions):
+    def drawHighlight(self, screen: pygame.Surface, possiblePositions: list[list[int]]) -> None:
         if possiblePositions == [[],[]]: return
         image_dot = pygame.transform.scale(pygame.image.load("images/black_dot.png"), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
         image_circle = pygame.transform.scale(pygame.image.load("images/black_circle.png"), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
@@ -227,7 +227,7 @@ class Game:
                     screen.blit(image_circle, pygame.Rect(x, y, GameManager.SQ_SIZE, GameManager.SQ_SIZE))
 
 
-    def drawPieces(self, screen, board):
+    def drawPieces(self, screen: pygame.Surface, board: Board) -> None:
         for i in range(GameManager.DIMENSION):
             for j in range(GameManager.DIMENSION):
                 if board[i][j] != PieceName.EMPTY:

@@ -1,3 +1,4 @@
+import pygame
 import pygame_menu
 from pygame_menu import themes
 import GameManager
@@ -9,8 +10,7 @@ class MessageBox:
         self.__question = "Would you like to restart the game?"
         self.__titleMessage = "Game Over"
 
-    def ask_restart(self, isWhite, screen):
-        import pygame
+    def ask_restart(self, isWhite: bool, screen: pygame.Surface) -> bool | None:
         if not pygame.get_init():
             pygame.init()
 

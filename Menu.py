@@ -33,21 +33,21 @@ class Menu:
 
         self.surface = None
 
-    def set_elo(self, selected, value):
+    def set_elo(self, value: int) -> None:
         self.elo = value
 
-    def elo_menu(self):
+    def elo_menu(self) -> None:
         self.elo_select_menu.mainloop(self.surface)
 
-    def select_pvp(self):
+    def select_pvp(self) -> None:
         self.mode = "pvp"
         self.main_menu.disable()
 
-    def select_ai(self):
+    def select_ai(self) -> None:
         self.mode = "ai"
         self.elo_select_menu.disable()
 
-    def mainloop(self, surface):
+    def mainloop(self, surface: pygame.Surface) -> tuple[str | None, int]:
         self.surface = surface
         self.main_menu.mainloop(surface)
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)

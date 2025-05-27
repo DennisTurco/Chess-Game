@@ -1,6 +1,8 @@
 import pygame
 import logging
 import sys
+from pygame_menu.font import FONT_MUNRO
+import pygame_menu.font as font_module
 
 from Board import Board
 from Move import Move
@@ -15,6 +17,11 @@ class Game:
 
     def __init__(self):
         self.IMAGES = {}
+
+        self.font_path = font_module.FONT_MUNRO
+        self.normal_text = pygame.font.Font(self.font_path, 20)
+        self.bold_text = pygame.font.SysFont(self.font_path, 35, bold=True)
+
         self.game()
 
 
@@ -148,7 +155,6 @@ class Game:
 
     def drawBoard(self, screen: pygame.Surface) -> None:
         colors = [pygame.Color('white'), pygame.Color('gray')]
-        font = pygame.font.SysFont("Arial", 16)
 
         for i in range(GameManager.DIMENSION):
             for j in range(GameManager.DIMENSION):
@@ -159,12 +165,12 @@ class Game:
 
                 # numbers to the left
                 if i == 0:
-                    text = font.render(str(8 - j), True, pygame.Color('black'))
+                    text = self.normal_text.render(str(8 - j), False, pygame.Color('black'))
                     screen.blit(text, (GameManager.SIDEBAR_WIDTH - 18, y + 4))
 
                 # letters down
                 if j == 7:
-                    text = font.render(chr(65 + i), True, pygame.Color('black'))
+                    text = self.normal_text.render(chr(65 + i), False, pygame.Color('black'))
                     screen.blit(text, (x + GameManager.SQ_SIZE // 2 - 6, GameManager.HEIGHT - 20))
 
 
@@ -187,20 +193,17 @@ class Game:
     def drawSidebar(self, screen: pygame.Surface, move_history: list) -> None:
         pygame.draw.rect(screen, pygame.Color("lightgray"), pygame.Rect(0, 0, GameManager.SIDEBAR_WIDTH, GameManager.HEIGHT))
 
-        font = pygame.font.SysFont("Arial", 20, bold=True)
-        small_font = pygame.font.SysFont("Arial", 16)
-
         # app name
-        title = font.render(GameManager.APP_NAME, True, pygame.Color("black"))
+        title = self.bold_text.render(GameManager.APP_NAME, False, pygame.Color("black"))
         screen.blit(title, (10, 10))
 
         # history moves
-        label = small_font.render("Moves:", True, pygame.Color("black"))
+        label = self.normal_text.render("Moves:", False, pygame.Color("black"))
         screen.blit(label, (10, 40))
 
         y_offset = 70
         for i, move in enumerate(move_history[-15:]):  # show only the last 15 moves
-            text = small_font.render(move, True, pygame.Color("black"))
+            text = self.normal_text.render(move, False, pygame.Color("black"))
             screen.blit(text, (10, y_offset + i * 18))
 
         if "reset" in self.buttons:

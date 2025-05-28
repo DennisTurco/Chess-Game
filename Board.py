@@ -1,9 +1,10 @@
 import copy
-from Enums.Piece import PieceName
+from typing import Optional
+from Enums.Piece import Color, PieceName
 
 class Board():
 
-    def __init__(self):
+    def __init__(self, color_side: Optional[Color] = None):
         self.board = [
             [PieceName.BLACK_ROOK, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_ROOK],
             [PieceName.BLACK_KNIGHT, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_KNIGHT],
@@ -14,6 +15,10 @@ class Board():
             [PieceName.BLACK_KNIGHT, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_KNIGHT],
             [PieceName.BLACK_ROOK, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_ROOK],
         ]
+
+        if color_side is not None and color_side == Color.BLACK:
+            self.board = [list(reversed(row)) for row in reversed(self.board)]
+
         self.startBoard = copy.deepcopy(self.board)
 
     def restartBoard(self) -> None:

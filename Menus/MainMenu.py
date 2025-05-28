@@ -3,6 +3,7 @@ import pygame
 import pygame_menu
 from pygame_menu import events
 
+from Enums.Piece import Color
 from Menus.Menu import Menu
 import GameManager
 
@@ -12,8 +13,9 @@ class MainMenu(Menu):
         super().__init__()
         self.mode = None
         self.elo = 1200
+        self.color_side = Color.WHITE
 
-        programIcon = pygame.image.load('images/wK.png')
+        programIcon = pygame.image.load('assets/images/wK.png')
         pygame.display.set_icon(programIcon)
 
         self.main_menu = pygame_menu.Menu(
@@ -44,6 +46,9 @@ class MainMenu(Menu):
             ('1800', 1800), ('2000', 2000), ('2200', 2200), ('2500', 2500),
             ('2800', 2800), ('3000', 3000)
             ], onchange=self.set_elo)
+        self.elo_select_menu.add.selector('Color:', [
+            ('White', Color.WHITE), ('Black', Color.BLACK)
+            ], onchange=self.set_color_side)
         self.elo_select_menu.add.button('Start AI Game', self.select_ai)
         self.elo_select_menu.add.button('Back', lambda: self.main_menu.mainloop(self.surface))
 
@@ -54,6 +59,9 @@ class MainMenu(Menu):
 
     def set_elo(self, selected, value: int) -> None:
         self.elo = value
+
+    def set_color_side(self, selected, value: Color) -> None:
+        self.color_side = value
 
     def elo_menu(self) -> None:
         self.elo_select_menu.mainloop(self.surface)
@@ -67,9 +75,10 @@ class MainMenu(Menu):
         self.logger.info("Mode selected: Player vs AI")
         self.mode = "ai"
         self.elo_select_menu.disable()
+        self.main_menu.disable()
 
-    def mainloop(self, surface: pygame.Surface) -> tuple[str | None, int]:
+    def mainloop(self, surface: pygame.Surface) -> tuple[str | None, int, Color]:
         self.surface = surface
         self.main_menu.mainloop(surface)
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-        return self.mode, self.elo
+        return self.mode, self.elo, self.color_side

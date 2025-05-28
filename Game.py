@@ -1,6 +1,7 @@
 import pygame
 import logging
 import sys
+from typing import Optional
 import pygame_menu.font as font_module
 
 from Board import Board
@@ -8,29 +9,33 @@ from Move import Move
 from Widgets.ButtonImage import ButtonImage
 from Entities.Pos import Pos
 from Entities.PosMove import PosMove
-from Enums.Piece import PieceName
+from Enums.Piece import Color, PieceName
 
 import GameManager
 
 class Game:
 
-    def __init__(self):
+    def __init__(self, color_side: Optional[Color] = None, elo: Optional[int] = None):
         self.logger = logging.getLogger(self.__class__.__name__)
-
-        self.IMAGES = {}
+        self.color_side = color_side
+        self.elo = elo
 
         font_path = font_module.FONT_MUNRO
         self.normal_text = pygame.font.Font(font_path, 20)
         self.bold_text = pygame.font.SysFont(font_path, 35, bold=True)
 
+        self.IMAGES = {}
+
         self.game()
 
 
     def game(self) -> None:
+        self.logger.info(f"Starting game with color_side={self.color_side}, elo={self.elo}")
+
         screen = self.init_and_get_window()
 
         playerClicks = PosMove()
-        board = Board()
+        board = Board(self.color_side)
         move = Move(playerClicks, board, screen)
         move_history = []
         possiblePositions = move.reset_posssible_positions()
@@ -111,7 +116,7 @@ class Game:
 
 
     def restart_game(self, screen: pygame.Surface, move_history: list):
-        board = Board()
+        board = Board(self.color_side)
         move = Move(PosMove(), board, screen)
         move_history.clear()
         playerClicks = PosMove()
@@ -122,7 +127,7 @@ class Game:
         pieces = ['bB', 'bK', 'bN', 'bp', 'bQ', 'bR', 'wB', 'wK', 'wN', 'wp', 'wQ', 'wR']
 
         for piece in pieces:
-            image = f"images/{piece}.png"
+            image = f"assets/images/{piece}.png"
             try:
                 self.IMAGES[piece] = pygame.transform.scale(pygame.image.load(image), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
             except:
@@ -132,7 +137,7 @@ class Game:
     def init_and_get_window(self) -> pygame.Surface:
         pygame.init()    # initialize pygame
         pygame.display.set_caption(GameManager.APP_NAME)
-        programIcon = pygame.image.load('images/wK.png')
+        programIcon = pygame.image.load('assets/images/wK.png')
         pygame.display.set_icon(programIcon)
         screen = pygame.display.set_mode((GameManager.WINDOW_WIDTH, GameManager.HEIGHT))
         screen.fill(pygame.Color('white'))
@@ -174,8 +179,8 @@ class Game:
 
     def draw_buttons(self, screen: pygame.Surface) -> dict[str, ButtonImage]:
         if not hasattr(self, "buttons"):
-            image_restart = pygame.image.load("images/reset.png").convert_alpha()
-            image_menu = pygame.image.load("images/reset.png").convert_alpha()
+            image_restart = pygame.image.load("assets/images/reset.png").convert_alpha()
+            image_menu = pygame.image.load("assets/images/reset.png").convert_alpha()
             reset_button = ButtonImage(screen, 10, 400, image_restart, 0.08, 180, 255)
             menu_button = ButtonImage(screen, 10, 450, image_menu, 0.08, 180, 255)
             self.buttons = {"reset": reset_button, "menu": menu_button}
@@ -214,8 +219,8 @@ class Game:
 
     def drawHighlight(self, screen: pygame.Surface, possiblePositions: list[list[int]]) -> None:
         if possiblePositions == [[],[]]: return
-        image_dot = pygame.transform.scale(pygame.image.load("images/black_dot.png"), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
-        image_circle = pygame.transform.scale(pygame.image.load("images/black_circle.png"), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
+        image_dot = pygame.transform.scale(pygame.image.load("assets/images/black_dot.png"), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
+        image_circle = pygame.transform.scale(pygame.image.load("assets/images/black_circle.png"), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
 
         for i in range(GameManager.DIMENSION):
             for j in range(GameManager.DIMENSION):

@@ -53,20 +53,45 @@ class Move():
             raise Exception("Player position cannot be none")
 
         self.__playSound()
-
         self.__initPossiblePositions()
 
         current_piece = self.getCurrentPieceName()
-
         current_piece = self.__check_and_get_promotion(current_piece)
+
+        self.__move_piece(current_piece)
+
+        self.__check_for_castling_move(current_piece)
+
+        self.__whiteMove = not self.__whiteMove
+
+        self.__printMatrix(self.__board.board)
+
+    def __move_piece(self, current_piece: PieceName) -> None:
+        if self.__playerClicks.final_position is None or self.__playerClicks.initial_position is None:
+            raise Exception("Player position cannot be none")
 
         self.__board.board[self.__playerClicks.final_position.x][self.__playerClicks.final_position.y] = current_piece
         self.__board.board[self.__playerClicks.initial_position.x][self.__playerClicks.initial_position.y] = PieceName.EMPTY
 
-        # change turn
-        self.__whiteMove = not self.__whiteMove
+    def __check_for_castling_move(self, current_piece: PieceName) -> None:
+        if self.__playerClicks.final_position is None or self.__playerClicks.initial_position is None:
+            raise Exception("Player position cannot be none")
 
-        self.__printMatrix(self.__board.board)
+        deta_x = self.__playerClicks.final_position.x - self.__playerClicks.initial_position.x
+        if current_piece.type == PieceType.KING and abs(deta_x) == 2:
+            y = self.__playerClicks.final_position.y
+            if deta_x == 2: # right castling
+                self.logger.info("Right castling")
+                self.__board.board[5][y] = self.getCurrentPieceName(7, y)
+                self.__board.board[7][y] = PieceName.EMPTY
+            else:               # left castling
+                self.logger.info("Left Castling")
+                self.__board.board[3][y] = self.getCurrentPieceName(0, y)
+                self.__board.board[0][y] = PieceName.EMPTY
+            if current_piece.color == Color.WHITE:
+                self.__whiteKingCastling = False
+            else:
+                self.__blackKingCastling = False
 
     def __check_and_get_promotion(self, current_piece: PieceName) -> PieceName:
         if self.__playerClicks.final_position is None:
@@ -75,11 +100,12 @@ class Move():
         if current_piece.type != PieceType.PAWN:
             return current_piece
 
+        menu = PromotionMenu()
         if current_piece.color == Color.BLACK and self.__playerClicks.final_position.y == 7:
-            type = PromotionMenu().show(self.__screen)
+            type = menu.show(self.__screen)
             current_piece = PieceName.from_string(Color.BLACK.value + type)
         elif current_piece.color == Color.WHITE and self.__playerClicks.final_position.y == 0:
-            type = PromotionMenu().show(self.__screen)
+            type = menu.show(self.__screen)
             current_piece = PieceName.from_string(Color.WHITE.value + type)
         return current_piece
 
@@ -119,22 +145,17 @@ class Move():
 
     # return True if the piace hab been moved correctly
     def moveRequest(self, playerClicks: PosMove) -> bool:
-        if self.__finished: return False
+        if self.__finished:
+            return False
 
-        # set __pos_start and __pos_final
         self.__setPlayerClicks(playerClicks)
 
         piece = self.getCurrentPieceName()
 
-        # errors check
-        if piece.color == Color.WHITE and self.__whiteMove == False:
-            self.logger.error(f"{sys.argv[0]} -> 'piece == Color.WHITE and self.__whiteMove == False'")
-            return False
-        elif piece.color == Color.BLACK and self.__whiteMove == True:
-            self.logger.error(f"{sys.argv[0]} -> 'piece == Color.BLACK and self.__whiteMove == True'")
+        if (piece.color == Color.WHITE and self.__whiteMove == False or
+            piece.color == Color.BLACK and self.__whiteMove == True):
             return False
 
-        # movement
         return self.__pieceMove()
 
 
@@ -188,7 +209,8 @@ class Move():
         if self.__possibleMovements[self.__playerClicks.final_position.x][self.__playerClicks.final_position.y] != 0:
             self.__modifyPosition()
             return True
-        else: return False
+        else:
+            return False
 
     def getCurrentPieceName(self, posx = None, posy = None) -> PieceName:
         if self.__playerClicks.initial_position is None:

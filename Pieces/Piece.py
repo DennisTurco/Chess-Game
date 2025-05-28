@@ -10,7 +10,7 @@ class Piece():
         self.possible_moves = [[0 for _ in range(8)] for _ in range(8)]
 
     def is_white_piece(self, x: int, y: int) -> bool:
-        piece = self.board[x][y]
+        piece = self.board.board[x][y]
         return piece != PieceName.EMPTY and piece.color == Color.WHITE
 
     def get_possible_moves(self) -> list[list[int]]:
@@ -26,7 +26,7 @@ class Piece():
         i, j = x + dx, y + dy
 
         while 0 <= i < 8 and 0 <= j < 8:
-            target_piece = self.board[i][j]
+            target_piece = self.board.board[i][j]
 
             if target_piece == PieceName.EMPTY:
                 self.possible_moves[i][j] = 1  # valid move
@@ -43,10 +43,8 @@ class Piece():
         i, j = x + dx, y + dy
 
         if 0 <= i < 8 and 0 <= j < 8:
-            target = self.board[i][j]
+            target = self.board.board[i][j]
             if target == PieceName.EMPTY:
                 self.possible_moves[i][j] = 1
             elif self.is_valid_capture(i, j):
                 self.possible_moves[i][j] = 2
-
-    

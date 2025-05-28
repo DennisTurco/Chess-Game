@@ -32,7 +32,7 @@ class Game:
         playerClicks: PosMove = PosMove()
 
         board = Board()
-        move = Move(playerClicks, board.board, screen)
+        move = Move(playerClicks, board, screen)
         move_history = []
         possiblePositions = move.reset_posssible_positions()
 
@@ -115,7 +115,7 @@ class Game:
 
     def restart_game(self, screen: pygame.Surface, move_history: list):
         board = Board()
-        move = Move(PosMove(), board.board, screen)
+        move = Move(PosMove(), board, screen)
         move_history.clear()
         playerClicks = PosMove()
         possiblePositions = move.reset_posssible_positions()
@@ -143,7 +143,7 @@ class Game:
 
 
     def refresh(self, screen: pygame.Surface, board: Board, possiblePositions: list[list[int]], move_history: list) -> None:
-        self.drawGameState(screen, board.board, possiblePositions, move_history)
+        self.drawGameState(screen, board, possiblePositions, move_history)
         pygame.display.flip()
 
 
@@ -234,8 +234,8 @@ class Game:
     def drawPieces(self, screen: pygame.Surface, board: Board) -> None:
         for i in range(GameManager.DIMENSION):
             for j in range(GameManager.DIMENSION):
-                if board[i][j] != PieceName.EMPTY:
-                    piece = str(board[i][j])
+                if board.board[i][j] != PieceName.EMPTY:
+                    piece = str(board.board[i][j])
                     try:
                         x = i * GameManager.SQ_SIZE + GameManager.SIDEBAR_WIDTH
                         y = j * GameManager.SQ_SIZE

@@ -1,6 +1,5 @@
 from Board import Board
 from Entities.Pos import Pos
-from Enums.Piece import Color, PieceName
 from Pieces.Piece import Piece
 
 class Bishop(Piece):

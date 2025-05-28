@@ -24,7 +24,7 @@ class ButtonImage:
         self.logger = logging.getLogger(self.__class__.__name__)
         self.draw()  # draw initially
 
-    def is_clicked(self, pos: Pos) -> bool:
+    def is_clicked(self, pos: tuple[int, int]) -> bool:
         if self.rect.collidepoint(pos):
             self.logger.info("Button image clicked")
             return True

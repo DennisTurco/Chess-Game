@@ -35,4 +35,4 @@ class PromotionMenu(Menu):
         self.surface = surface
         self.menu.mainloop(surface)
         self.logger.info(f"Promotion to {self.selection}")
-        return self.selection
+        return str(self.selection)

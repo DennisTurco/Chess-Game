@@ -20,6 +20,22 @@ For install the game you have to download the whole project and run it with pyth
 # Tecnical info
 * MainMenu created with: **[pygame-menu](https://pygame-menu.readthedocs.io/en/latest/_source/create_menu.html)**
 * Game created with: **pygame**
+* AI Engine: **[Stockfish](https://github.com/official-stockfish/Stockfish/)**
+* AI ELO extended: **[Fairy-Stockfish](https://github.com/fairy-stockfish/Fairy-Stockfish)**
+
+## Fairy-Stockfish ELO
+| Skill Level | Estimated ELO  |
+|-------------|----------------|
+| -5          | ~400           |
+| 0           | ~800           |
+| 2           | ~1000          |
+| 5           | ~1200          |
+| 7           | ~1400          |
+| 10          | ~1600          |
+| 12          | ~1800          |
+| 15          | ~2000          |
+| 17          | ~2300          |
+| 20          | ~2600+         |
 
 ## Licence
 

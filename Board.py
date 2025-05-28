@@ -18,3 +18,25 @@ class Board():
 
     def restartBoard(self) -> None:
         self.board = copy.deepcopy(self.startBoard) # to reset competly the board
+
+    # to convert the board to the standard fen
+    def board_to_fen(self) -> str:
+        fen_rows = []
+        for row in self.board:
+            empty = 0
+            fen_row = ""
+            for piece in row:
+                symbol = piece.value  # e.g., 'p', 'K', '.'
+                if symbol == ".":
+                    empty += 1
+                else:
+                    if empty > 0:
+                        fen_row += str(empty)
+                        empty = 0
+                    fen_row += symbol
+            if empty > 0:
+                fen_row += str(empty)
+            fen_rows.append(fen_row)
+        fen = "/".join(fen_rows)
+        fen += " w KQkq - 0 1"  # Add default metadata
+        return fen

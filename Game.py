@@ -19,9 +19,9 @@ class Game:
 
         self.IMAGES = {}
 
-        self.font_path = font_module.FONT_MUNRO
-        self.normal_text = pygame.font.Font(self.font_path, 20)
-        self.bold_text = pygame.font.SysFont(self.font_path, 35, bold=True)
+        font_path = font_module.FONT_MUNRO
+        self.normal_text = pygame.font.Font(font_path, 20)
+        self.bold_text = pygame.font.SysFont(font_path, 35, bold=True)
 
         self.game()
 
@@ -29,8 +29,7 @@ class Game:
     def game(self) -> None:
         screen = self.init_and_get_window()
 
-        playerClicks: PosMove = PosMove()
-
+        playerClicks = PosMove()
         board = Board()
         move = Move(playerClicks, board, screen)
         move_history = []
@@ -67,8 +66,6 @@ class Game:
                     board_x = (pos[0] - GameManager.SIDEBAR_WIDTH) // GameManager.SQ_SIZE
                     board_y = pos[1] // GameManager.SQ_SIZE
                     posxy: Pos = Pos(board_x, board_y)
-
-                    self.logger.debug(f"position clicked = {posxy}")
 
                     # check if is a piece
                     if board.board[posxy.x][posxy.y] != PieceName.EMPTY:
@@ -175,7 +172,7 @@ class Game:
                     screen.blit(text, (x + GameManager.SQ_SIZE // 2 - 6, GameManager.HEIGHT - 20))
 
 
-    def draw_buttons(self, screen: pygame.Surface):
+    def draw_buttons(self, screen: pygame.Surface) -> dict[str, ButtonImage]:
         if not hasattr(self, "buttons"):
             image_restart = pygame.image.load("images/reset.png").convert_alpha()
             image_menu = pygame.image.load("images/reset.png").convert_alpha()

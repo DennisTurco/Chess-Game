@@ -81,7 +81,7 @@ def main():
     fen_before = "r1bqkbnr/pppp1ppp/2n5/4p3/1b2P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 4"
     move = "c2c3"  # Let's say the user made this move
     # Get move quality
-    quality = engine.evaluate_move_quality(fen_before, move)
+    quality = engine.evaluate_move_quality(fen_before, move_uci=move)
     print(f"Move {move}: {quality}")
     # Also get best move and evaluation for context
     best_move = engine.get_best_move(fen_before)

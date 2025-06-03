@@ -6,6 +6,7 @@ import pygame_menu.font as font_module
 
 from Board import Board
 from Move import Move
+from MoveEmulator import MoveEvaluator
 from Widgets.ButtonImage import ButtonImage
 from Entities.Pos import Pos
 from Entities.PosMove import PosMove
@@ -18,7 +19,8 @@ class Game:
     def __init__(self, color_side: Optional[Color] = None, elo: Optional[int] = None):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.color_side = color_side
-        self.elo = elo
+        self.elo = elo if elo is not None else 0
+        self.engine = MoveEvaluator(skill_level=self.elo)
 
         font_path = font_module.FONT_MUNRO
         self.normal_text = pygame.font.Font(font_path, 20)
@@ -40,6 +42,8 @@ class Game:
         move_history = []
         possiblePositions = move.reset_posssible_positions()
 
+        player_turn = (self.color_side is Color.WHITE) or (self.elo is None)
+
         self.loadImages()
         running = True
         self.buttons = self.draw_buttons(screen)
@@ -49,6 +53,13 @@ class Game:
 
             self.refresh(screen, board, possiblePositions, move_history)
             self.buttons = self.draw_buttons(screen)
+
+            if not player_turn:
+                engine_movement = self.engine.get_best_move(board.board_to_fen())
+                move.apply_engine_move(engine_movement)
+                player_turn = True
+                print(board.board_to_fen())
+                continue
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
@@ -90,6 +101,7 @@ class Game:
                                 move_notation = f"{chr(65 + playerClicks.initial_position.x)}{8 - playerClicks.initial_position.y} -> {chr(65 + playerClicks.final_position.x)}{8 - playerClicks.final_position.y}"
                                 move_history.append(move_notation)
                                 self.logger.info(f"Moving piece from {playerClicks.initial_position} to {playerClicks.final_position}")
+                                print(board.board_to_fen())
                             # reset possiblePositions
                             playerClicks = PosMove()
                             possiblePositions = move.reset_posssible_positions()
@@ -101,9 +113,11 @@ class Game:
                             move_notation = f"{chr(65 + playerClicks.initial_position.x)}{8 - playerClicks.initial_position.y} -> {chr(65 + playerClicks.final_position.x)}{8 - playerClicks.final_position.y}"
                             move_history.append(move_notation)
                             self.logger.info(f"Moving piece from {playerClicks.initial_position} to {playerClicks.final_position}")
+                            print(board.board_to_fen())
                         # reset possiblePositions
                         playerClicks = PosMove()
                         possiblePositions = move.reset_posssible_positions()
+                        player_turn = self.__is_player_turn(not player_turn)
 
                 if move.restart():
                     (board, move, move_history, playerClicks, possiblePositions) = self.restart_game(screen, move_history)
@@ -114,6 +128,8 @@ class Game:
 
                 self.refresh(screen, board, possiblePositions, move_history)
 
+    def __is_player_turn(self, player_turn):
+        return self.elo is None or player_turn
 
     def restart_game(self, screen: pygame.Surface, move_history: list):
         board = Board(self.color_side)

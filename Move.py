@@ -69,9 +69,7 @@ class Move():
     def __move_piece(self, current_piece: PieceName) -> None:
         if self.__playerClicks.final_position is None or self.__playerClicks.initial_position is None:
             raise Exception("Player position cannot be none")
-
-        self.__board.board[self.__playerClicks.final_position.x][self.__playerClicks.final_position.y] = current_piece
-        self.__board.board[self.__playerClicks.initial_position.x][self.__playerClicks.initial_position.y] = PieceName.EMPTY
+        self.__board.move_piece(self.__playerClicks.initial_position, self.__playerClicks.final_position, current_piece, PieceName.EMPTY, True)
 
     def __check_for_castling_move(self, current_piece: PieceName) -> None:
         if self.__playerClicks.final_position is None or self.__playerClicks.initial_position is None:
@@ -82,12 +80,10 @@ class Move():
             y = self.__playerClicks.final_position.y
             if deta_x == 2: # right castling
                 self.logger.info("Right castling")
-                self.__board.board[5][y] = self.getCurrentPieceName(7, y)
-                self.__board.board[7][y] = PieceName.EMPTY
+                self.__board.move_piece(Pos(5, y), Pos(7, y), self.getCurrentPieceName(7, y), PieceName.EMPTY, False)
             else:               # left castling
                 self.logger.info("Left Castling")
-                self.__board.board[3][y] = self.getCurrentPieceName(0, y)
-                self.__board.board[0][y] = PieceName.EMPTY
+                self.__board.move_piece(Pos(3, y), Pos(0, y), self.getCurrentPieceName(0, y), PieceName.EMPTY, False)
             if current_piece.color == Color.WHITE:
                 self.__whiteKingCastling = False
             else:
@@ -266,3 +262,24 @@ class Move():
 
     def __setPlayerClicks(self, playerClicks: PosMove) -> None:
         self.__playerClicks = playerClicks
+
+    def __algebraic_to_index(self, square: str) -> tuple[int, int]:
+        col = ord(square[0].lower()) - ord('a')
+        row = 8 - int(square[1])
+        return row, col
+
+    def __parse_move(self, move: str) -> tuple[tuple[int, int], tuple[int, int]]:
+        return self.__algebraic_to_index(move[:2]), self.__algebraic_to_index(move[2:])
+
+    def apply_engine_move(self, move: str) -> None:
+        from_pos, to_pos = self.__parse_move(move)
+        if self.__board.is_flipped():
+            from_pos = self.invert_coords_if_black(from_pos)
+            to_pos = self.invert_coords_if_black(to_pos)
+        piece = self.__board.board[from_pos[0]][from_pos[1]]
+        self.__board.move_piece(Pos(from_pos[0], from_pos[1]), Pos(to_pos[0], to_pos[1]), piece, PieceName.EMPTY, True)
+
+        self.__whiteMove = not self.__whiteMove
+
+    def invert_coords_if_black(self, pos: tuple[int, int]) -> tuple[int, int]:
+        return (7 - pos[0], 7 - pos[1])

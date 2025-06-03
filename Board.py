@@ -1,6 +1,7 @@
 import copy
 from typing import Optional
 from Entities.Pos import Pos
+from Entities.PosMove import PosMove
 from Enums.Piece import Color, PieceName
 
 class Board():
@@ -61,6 +62,13 @@ class Board():
         fen = "/".join(fen_rows)
         fen += f" {"w" if self.turn is Color.WHITE else "b"} KQkq - 0 1"
         return fen
+
+    def get_notation(self, pos_move: PosMove) -> str:
+        start = pos_move.initial_position
+        end = pos_move.final_position
+        if start and end:
+            return f"{chr(65 + start.x)}{8 - start.y} -> {chr(65 + end.x)}{8 - end.y}"
+        return ""
 
     def is_flipped(self):
         return self.__is_flipped

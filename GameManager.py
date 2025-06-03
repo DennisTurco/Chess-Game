@@ -1,5 +1,6 @@
 import logging
 import pygame
+from Enums.Mode import Mode
 from Menus.MainMenu import MainMenu
 from Game import Game
 
@@ -28,10 +29,10 @@ class GameManager():
                 running = False
                 continue
 
-            if mode == "pvp":
+            if mode == Mode.PVP:
                 self.logger.debug("Running game in Player vs Player mode")
                 Game()
-            elif mode == "ai":
+            elif mode == Mode.PVE:
                 self.logger.debug("Running game in Player vs AI mode")
                 Game(color_side, elo)
             else:

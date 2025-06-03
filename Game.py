@@ -5,6 +5,7 @@ from typing import Optional
 import pygame_menu.font as font_module
 
 from Board import Board
+from Enums.Mode import Mode
 from Move import Move
 from MoveEmulator import MoveEvaluator
 from Widgets.ButtonImage import ButtonImage
@@ -16,12 +17,22 @@ import GameManager
 
 class Game:
 
-    def __init__(self, color_side: Optional[Color] = None, elo: Optional[int] = None):
+    def __init__(self, color_side: Color = Color.WHITE, elo: Optional[int] = None):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.color_side = color_side
-        self.elo = elo if elo is not None else 0
+        self.elo = elo if elo is not None else 20
+
+        self.mode: Mode
+        if elo is None:
+            self.mode = Mode.PVP
+            self.elo = 20
+        else:
+            self.mode = Mode.PVE
+            self.elo = elo
+
         self.engine = MoveEvaluator(skill_level=self.elo)
 
+        self.move_comment: str = ""
         font_path = font_module.FONT_MUNRO
         self.normal_text = pygame.font.Font(font_path, 20)
         self.bold_text = pygame.font.SysFont(font_path, 35, bold=True)
@@ -33,16 +44,15 @@ class Game:
 
     def game(self) -> None:
         self.logger.info(f"Starting game with color_side={self.color_side}, elo={self.elo}")
-
         screen = self.init_and_get_window()
 
-        playerClicks = PosMove()
         board = Board(self.color_side)
-        move = Move(playerClicks, board, screen)
-        move_history = []
+        move = Move(PosMove(), board, screen)
+        move_history: list[str] = []
+        playerClicks = PosMove()
         possiblePositions = move.reset_posssible_positions()
 
-        player_turn = (self.color_side is Color.WHITE) or (self.elo is None)
+        player_turn = self._is_player_turn(True)
 
         self.loadImages()
         running = True
@@ -50,85 +60,75 @@ class Game:
 
         while running:
             screen.fill(pygame.Color('white'))
-
             self.refresh(screen, board, possiblePositions, move_history)
             self.buttons = self.draw_buttons(screen)
 
-            if not player_turn:
+            if self.mode == Mode.PVE and not player_turn:
                 engine_movement = self.engine.get_best_move(board.board_to_fen())
                 move.apply_engine_move(engine_movement)
                 player_turn = True
-                print(board.board_to_fen())
                 continue
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
-
-                if event.type == pygame.MOUSEBUTTONUP:
+                elif event.type == pygame.MOUSEBUTTONUP:
                     pos = pygame.mouse.get_pos()
-
-                    if self.buttons["reset"].is_clicked(pos):
-                        (board, move, move_history, playerClicks, possiblePositions) = self.restart_game(screen, move_history)
-                        continue
-
-                    if self.buttons["menu"].is_clicked(pos):
-                        running = False
-                        return
-
-                    if pos[0] < GameManager.SIDEBAR_WIDTH:
-                        continue
-
-                    board_x = (pos[0] - GameManager.SIDEBAR_WIDTH) // GameManager.SQ_SIZE
-                    board_y = pos[1] // GameManager.SQ_SIZE
-                    posxy: Pos = Pos(board_x, board_y)
-
-                    # check if is a piece
-                    if board.board[posxy.x][posxy.y] != PieceName.EMPTY:
-
-                        if playerClicks.initial_position is None or (move.isPlayerWhiteTurn() and move.isWhitePiece(posxy.x, posxy.y)) or (not move.isPlayerWhiteTurn() and not move.isWhitePiece(posxy.x, posxy.y)):
-                            playerClicks.initial_position = posxy
-                            move.setPossibleMovements(posxy)
-                            possiblePositions = move.getPossiblePositions()
-
-                        elif playerClicks.initial_position == posxy:
-                            playerClicks.initial_position = None
-
-                        # check if the second position is a piece
-                        elif playerClicks.initial_position is not None:
-                            playerClicks.final_position = posxy
-                            if move.captureRequest(playerClicks):
-                                move_notation = f"{chr(65 + playerClicks.initial_position.x)}{8 - playerClicks.initial_position.y} -> {chr(65 + playerClicks.final_position.x)}{8 - playerClicks.final_position.y}"
-                                move_history.append(move_notation)
-                                self.logger.info(f"Moving piece from {playerClicks.initial_position} to {playerClicks.final_position}")
-                                print(board.board_to_fen())
-                            # reset possiblePositions
-                            playerClicks = PosMove()
-                            possiblePositions = move.reset_posssible_positions()
-
-                    # check if first position is selected and the second not
-                    elif playerClicks.initial_position is not None and playerClicks.final_position is None:
-                        playerClicks.final_position = posxy
-                        if move.moveRequest(playerClicks):
-                            move_notation = f"{chr(65 + playerClicks.initial_position.x)}{8 - playerClicks.initial_position.y} -> {chr(65 + playerClicks.final_position.x)}{8 - playerClicks.final_position.y}"
-                            move_history.append(move_notation)
-                            self.logger.info(f"Moving piece from {playerClicks.initial_position} to {playerClicks.final_position}")
-                            print(board.board_to_fen())
-                        # reset possiblePositions
-                        playerClicks = PosMove()
-                        possiblePositions = move.reset_posssible_positions()
-                        player_turn = self.__is_player_turn(not player_turn)
+                    running, board, move, move_history, playerClicks, possiblePositions, player_turn = \
+                        self.__handle_mouse_click(pos, screen, board, move, move_history, playerClicks, possiblePositions, player_turn)
 
                 if move.restart():
-                    (board, move, move_history, playerClicks, possiblePositions) = self.restart_game(screen, move_history)
+                    board, move, move_history, playerClicks, possiblePositions = self.restart_game(screen, move_history)
                     continue
                 elif move.isFinished():
                     running = False
-                    return
 
                 self.refresh(screen, board, possiblePositions, move_history)
 
-    def __is_player_turn(self, player_turn):
+    def __handle_mouse_click(self, pos: tuple[int, int], screen: pygame.Surface, board: Board, move: Move, move_history: list, playerClicks: PosMove, possiblePositions: list[list[int]], player_turn: bool):
+        if self.buttons["reset"].is_clicked(pos):
+            return True, *self.restart_game(screen, move_history), self._is_player_turn(True)
+
+        if self.buttons["menu"].is_clicked(pos):
+            return False, board, move, move_history, playerClicks, possiblePositions, player_turn
+
+        if pos[0] < GameManager.SIDEBAR_WIDTH:
+            return True, board, move, move_history, playerClicks, possiblePositions, player_turn
+
+        board_x = (pos[0] - GameManager.SIDEBAR_WIDTH) // GameManager.SQ_SIZE
+        board_y = pos[1] // GameManager.SQ_SIZE
+        posxy = Pos(board_x, board_y)
+
+        selected_piece = board.board[posxy.x][posxy.y]
+
+        if selected_piece != PieceName.EMPTY:
+            if not playerClicks.initial_position or move.is_current_turn_piece(posxy):
+                playerClicks.initial_position = posxy
+                move.setPossibleMovements(posxy)
+                possiblePositions = move.getPossiblePositions()
+            elif playerClicks.initial_position == posxy:
+                playerClicks.reset()
+            else:
+                playerClicks.final_position = posxy
+                if move.captureRequest(playerClicks):
+                    move_notation = board.get_notation(playerClicks)
+                    move_history.append(move_notation)
+                    self.logger.info(f"Captured from {playerClicks.initial_position} to {playerClicks.final_position}")
+                playerClicks.reset()
+                possiblePositions = move.reset_posssible_positions()
+        elif playerClicks.initial_position:
+            playerClicks.final_position = posxy
+            if move.moveRequest(playerClicks):
+                move_notation = board.get_notation(playerClicks)
+                move_history.append(move_notation)
+                self.logger.info(f"Moved from {playerClicks.initial_position} to {playerClicks.final_position}")
+            playerClicks.reset()
+            possiblePositions = move.reset_posssible_positions()
+            player_turn = self._is_player_turn(not player_turn)
+
+        return True, board, move, move_history, playerClicks, possiblePositions, player_turn
+
+    def _is_player_turn(self, player_turn: bool) -> bool:
         return self.elo is None or player_turn
 
     def restart_game(self, screen: pygame.Surface, move_history: list):
@@ -232,6 +232,11 @@ class Game:
             self.buttons["menu"].update()
             self.buttons["menu"].draw()
 
+        if self.move_comment:
+            comment_label = self.normal_text.render("Comment:", False, pygame.Color("black"))
+            comment_text = self.normal_text.render(self.move_comment, False, pygame.Color("blue"))
+            screen.blit(comment_label, (10, y_offset + 15 * 18 + 10))
+            screen.blit(comment_text, (10, y_offset + 15 * 18 + 30))
 
     def drawHighlight(self, screen: pygame.Surface, possiblePositions: list[list[int]]) -> None:
         if possiblePositions == [[],[]]: return

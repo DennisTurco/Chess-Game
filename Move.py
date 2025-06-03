@@ -217,6 +217,13 @@ class Move():
         else:
             return self.__board.board[posx][posy]
 
+    def is_current_turn_piece(self, pos: Pos) -> bool:
+        piece = self.__board.board[pos.x][pos.y]
+        if piece == PieceName.EMPTY:
+            return False
+        is_white_piece = (piece.color == Color.WHITE)
+        return is_white_piece == self.isPlayerWhiteTurn()
+
     def getTargetPieceName(self) -> PieceName:
         if self.__playerClicks.final_position is None:
             raise Exception("Player position cannot be none")

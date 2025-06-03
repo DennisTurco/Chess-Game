@@ -3,6 +3,7 @@ import pygame
 import pygame_menu
 from pygame_menu import events
 
+from Enums.Mode import Mode
 from Enums.Piece import Color
 from Menus.Menu import Menu
 import GameManager
@@ -68,16 +69,16 @@ class MainMenu(Menu):
 
     def select_pvp(self) -> None:
         self.logger.info("Mode selected: Player vs Player")
-        self.mode = "pvp"
+        self.mode = Mode.PVP
         self.main_menu.disable()
 
     def select_ai(self) -> None:
         self.logger.info("Mode selected: Player vs AI")
-        self.mode = "ai"
+        self.mode = Mode.PVE
         self.elo_select_menu.disable()
         self.main_menu.disable()
 
-    def mainloop(self, surface: pygame.Surface) -> tuple[str | None, int, Color]:
+    def mainloop(self, surface: pygame.Surface) -> tuple[Mode | None, int, Color]:
         self.surface = surface
         self.main_menu.mainloop(surface)
         pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)

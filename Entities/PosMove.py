@@ -14,3 +14,7 @@ class PosMove:
                f"{self.initial_position.y if self.initial_position else 'None'}], " \
                f"[{self.final_position.x if self.final_position else 'None'}, " \
                f"{self.final_position.y if self.final_position else 'None'}]]"
+
+    def reset(self):
+        self.initial_position = None
+        self.final_position = None

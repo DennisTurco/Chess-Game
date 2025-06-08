@@ -46,10 +46,10 @@ class MainMenu(Menu):
             ('400', 400), ('600', 600), ('800', 800), ('1000', 1000), ('1200', 1200), ('1500', 1500),
             ('1800', 1800), ('2000', 2000), ('2200', 2200), ('2500', 2500),
             ('2800', 2800), ('3000', 3000)
-            ], onchange=self.set_elo)
+            ], default=4, onchange=self.set_elo)
         self.elo_select_menu.add.selector('Color:', [
             ('White', Color.WHITE), ('Black', Color.BLACK)
-            ], onchange=self.set_color_side)
+            ], default=0, onchange=self.set_color_side)
         self.elo_select_menu.add.button('Start AI Game', self.select_ai)
         self.elo_select_menu.add.button('Back', lambda: self.main_menu.mainloop(self.surface))
 

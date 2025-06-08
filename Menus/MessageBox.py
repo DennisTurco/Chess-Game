@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 import pygame
 import pygame_menu
 from Menus.Menu import Menu
@@ -8,16 +9,20 @@ class MessageBox(Menu):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.info("Opening game over message")
         super().__init__()
-        self.__whiteWin = "White has won the game!"
-        self.__blackWin = "Black has won the game!"
-        self.__question = "Would you like to restart the game?"
-        self.__titleMessage = "Game Over"
+        self._whiteWin = "White has won the game!"
+        self._blackWin = "Black has won the game!"
+        self._stalmate = "The match finished in stalmate"
+        self._question = "Would you like to restart the game?"
+        self._titleMessage = "Game Over"
 
-    def ask_restart(self, isWhite: bool, screen: pygame.Surface) -> bool | None:
+    def ask_restart(self, is_white: Optional[bool], screen: pygame.Surface) -> bool | None:
         if not pygame.get_init():
             pygame.init()
 
-        message = f"{(self.__whiteWin if isWhite else self.__blackWin)}\n{self.__question}"
+        if is_white is None:
+            message = f"{self._stalmate}\n{self._question}"
+        else:
+            message = f"{(self._whiteWin if is_white else self._blackWin)}\n{self._question}"
 
         restart = None
 
@@ -32,7 +37,7 @@ class MessageBox(Menu):
             menu.disable()
 
         menu = pygame_menu.Menu(
-            title=self.__titleMessage,
+            title=self._titleMessage,
             width=self.WIDTH,
             height=self.HEIGHT,
             theme=self.custom_theme

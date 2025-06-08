@@ -1,9 +1,10 @@
-from Board import Board
+import chess
+
 from Entities.Pos import Pos
 from Pieces.Piece import Piece
 
 class Queen(Piece):
-    def __init__(self, board: Board, is_white_turn: bool):
+    def __init__(self, board: chess.Board, is_white_turn: bool):
         super().__init__(board, is_white_turn)
 
     def generate_moves(self, posxy: Pos) -> None:

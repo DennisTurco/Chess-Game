@@ -4,7 +4,7 @@ from GameManager import GameManager
 
 def configure_logger():
     logging.basicConfig(
-        level=logging.DEBUG,
+        level=logging.INFO,
         format='%(asctime)s - [%(levelname)s] - %(name)s:%(lineno)d - %(message)s'
     )
 

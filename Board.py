@@ -1,74 +1,34 @@
-import copy
-from typing import Optional
-from Entities.Pos import Pos
-from Entities.PosMove import PosMove
-from Enums.Piece import Color, PieceName
+import chess
 
-class Board():
+class Board:
+    def __init__(self, fen=None):
+        if fen is None:
+            self.board = chess.Board()
+        else:
+            self.board = chess.Board(fen)
 
-    def __init__(self, color_side: Optional[Color] = None):
-        self.board = [
-            [PieceName.BLACK_ROOK, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_ROOK],
-            [PieceName.BLACK_KNIGHT, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_KNIGHT],
-            [PieceName.BLACK_BISHOP, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_BISHOP],
-            [PieceName.BLACK_QUEEN, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_QUEEN],
-            [PieceName.BLACK_KING, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_KING],
-            [PieceName.BLACK_BISHOP, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_BISHOP],
-            [PieceName.BLACK_KNIGHT, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_KNIGHT],
-            [PieceName.BLACK_ROOK, PieceName.BLACK_PAWN, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.EMPTY, PieceName.WHITE_PAWN, PieceName.WHITE_ROOK],
-        ]
+    def move_piece(self, uci_move: str) -> bool:
+        """Apply a UCI format move (es. e2e4). Return True if valid"""
+        move = chess.Move.from_uci(uci_move)
+        if move in self.board.legal_moves:
+            self.board.push(move)
+            return True
+        return False
 
-        self.turn = Color.WHITE
+    def board_to_fen(self) -> str:
+        return self.board.fen()
 
-        self.__is_flipped = False
-        if color_side is not None and color_side == Color.BLACK:
-            self.board = [list(reversed(row)) for row in reversed(self.board)]
-            self.__is_flipped = True
-
-        self.startBoard = copy.deepcopy(self.board)
+    def is_flipped(self) -> bool:
+        return False
 
     def restartBoard(self) -> None:
-        self.board = copy.deepcopy(self.startBoard) # to reset competly the board
+        self.board.reset()
 
-    def move_piece(self, initial_pos: Pos, final_pos: Pos, initial_piece: PieceName, final_piece: PieceName, switch_turn: bool = True):
-        self.board[initial_pos.x][initial_pos.y] = final_piece
-        self.board[final_pos.x][final_pos.y] = initial_piece
+    def get_piece_at(self, square: chess.Square):
+        if isinstance(square, str):
+            square = chess.parse_square(square)
+        piece = self.board.piece_at(square)
+        return piece  # chess.Piece object or None
 
-        if switch_turn:
-            self.turn = Color.WHITE if self.turn == Color.BLACK else Color.BLACK
-
-    # to convert the board to the standard fen
-    def board_to_fen(self) -> str:
-        fen_rows = []
-        for row in self.board:
-            empty = 0
-            fen_row = ""
-            for piece in row:
-                if piece == PieceName.EMPTY:
-                    empty += 1
-                else:
-                    if empty > 0:
-                        fen_row += str(empty)
-                        empty = 0
-                    symbol = piece.type.value
-                    if piece.color == Color.BLACK:
-                        symbol = symbol.lower()
-                    else:
-                        symbol = symbol.upper()
-                    fen_row += symbol
-            if empty > 0:
-                fen_row += str(empty)
-            fen_rows.append(fen_row)
-        fen = "/".join(fen_rows)
-        fen += f" {"w" if self.turn is Color.WHITE else "b"} KQkq - 0 1"
-        return fen
-
-    def get_notation(self, pos_move: PosMove) -> str:
-        start = pos_move.initial_position
-        end = pos_move.final_position
-        if start and end:
-            return f"{chr(65 + start.x)}{8 - start.y} -> {chr(65 + end.x)}{8 - end.y}"
-        return ""
-
-    def is_flipped(self):
-        return self.__is_flipped
+    def turn(self):
+        return self.board.turn  # True = White, False = Black

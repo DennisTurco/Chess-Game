@@ -30,10 +30,10 @@ class GameManager():
                 continue
 
             if mode == Mode.PVP:
-                self.logger.debug("Running game in Player vs Player mode")
+                self.logger.info("Running game in Player vs Player mode")
                 Game()
             elif mode == Mode.PVE:
-                self.logger.debug("Running game in Player vs AI mode")
+                self.logger.info("Running game in Player vs AI mode")
                 Game(color_side, elo)
             else:
                 raise Exception("Mode selected is not valid")

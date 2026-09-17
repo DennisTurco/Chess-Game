@@ -4,6 +4,7 @@ import pygame
 import pygame_menu
 from Menus.Menu import Menu
 
+
 class MessageBox(Menu):
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -36,15 +37,10 @@ class MessageBox(Menu):
             restart = False
             menu.disable()
 
-        menu = pygame_menu.Menu(
-            title=self._titleMessage,
-            width=self.WIDTH,
-            height=self.HEIGHT,
-            theme=self.custom_theme
-        )
+        menu = pygame_menu.Menu(title=self._titleMessage, width=self.WIDTH, height=self.HEIGHT, theme=self.custom_theme)
         menu.add.label(message, max_char=-1, font_size=20)
-        menu.add.button('Yes', on_yes)
-        menu.add.button('No', on_no)
+        menu.add.button("Yes", on_yes)
+        menu.add.button("No", on_no)
 
         clock = pygame.time.Clock()
 

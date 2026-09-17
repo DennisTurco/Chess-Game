@@ -1,6 +1,7 @@
 import chess
 from Entities.Pos import Pos
 
+
 class Piece:
     def __init__(self, board: chess.Board, is_white_turn: bool) -> None:
         self.board = board
@@ -21,7 +22,9 @@ class Piece:
         if piece is None:
             return False
         # controllo che il pezzo appartenga al colore opposto rispetto al turno corrente
-        if (piece.color == chess.WHITE and not self.is_white_turn) or (piece.color == chess.BLACK and self.is_white_turn):
+        if (piece.color == chess.WHITE and not self.is_white_turn) or (
+            piece.color == chess.BLACK and self.is_white_turn
+        ):
             return True
         return False
 

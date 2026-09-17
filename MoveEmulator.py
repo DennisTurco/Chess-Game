@@ -4,6 +4,7 @@ import os
 
 from MoveComment import MoveComment
 
+
 class MoveEvaluator:
     def __init__(self, path_to_engine: str = "./assets/engines/fairy-stockfish_x86-64.exe", skill_level: int = -5):
         if not os.path.exists(path_to_engine):
@@ -15,7 +16,7 @@ class MoveEvaluator:
         level = max(-5, min(level, 20))
         self.engine.configure({"Skill Level": level})
 
-    def get_best_move(self, fen: str, time_limit: float = 0.1) -> str:
+    def get_best_move(self, fen: str, time_limit: float = 0.5) -> str:
         board = chess.Board(fen)
         result = self.engine.play(board, chess.engine.Limit(time=time_limit))
         if result.move is None:
@@ -97,6 +98,7 @@ def main():
     print("Position comment:", comment.comment)
     print("Suggested best move:", comment.best)
     engine.close()
+
 
 if __name__ == "__main__":
     main()

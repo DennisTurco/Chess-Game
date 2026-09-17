@@ -8,6 +8,7 @@ from Enums.Piece import Color
 from Menus.Menu import Menu
 import GameManager
 
+
 class MainMenu(Menu):
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -16,45 +17,48 @@ class MainMenu(Menu):
         self.elo = 1200
         self.color_side = Color.WHITE
 
-        programIcon = pygame.image.load('assets/images/wK.png')
+        programIcon = pygame.image.load("assets/images/wK.png")
         pygame.display.set_icon(programIcon)
 
         self.main_menu = pygame_menu.Menu(
-            title=f'Welcome to {GameManager.APP_NAME}',
-            width=self.WIDTH,
-            height=self.HEIGHT,
-            theme=self.custom_theme
+            title=f"Welcome to {GameManager.APP_NAME}", width=self.WIDTH, height=self.HEIGHT, theme=self.custom_theme
         )
-        self.mode_menu = pygame_menu.Menu(
-            title='Modes',
-            width=self.WIDTH,
-            height=self.HEIGHT,
-            theme=self.custom_theme
-        )
+        self.mode_menu = pygame_menu.Menu(title="Modes", width=self.WIDTH, height=self.HEIGHT, theme=self.custom_theme)
 
-        self.mode_menu.add.button('Player vs Player', self.select_pvp)
-        self.mode_menu.add.button('Player vs AI', self.elo_menu)
-        self.mode_menu.add.button('Back', events.BACK)
+        self.mode_menu.add.button("Player vs Player", self.select_pvp)
+        self.mode_menu.add.button("Player vs AI", self.elo_menu)
+        self.mode_menu.add.button("Back", events.BACK)
 
         self.elo_select_menu = pygame_menu.Menu(
-            title='Select AI Difficulty (ELO)',
-            width=self.WIDTH,
-            height=self.HEIGHT,
-            theme=self.custom_theme
+            title="Select AI Difficulty (ELO)", width=self.WIDTH, height=self.HEIGHT, theme=self.custom_theme
         )
-        self.elo_select_menu.add.selector('ELO level:', [
-            ('400', 400), ('600', 600), ('800', 800), ('1000', 1000), ('1200', 1200), ('1500', 1500),
-            ('1800', 1800), ('2000', 2000), ('2200', 2200), ('2500', 2500),
-            ('2800', 2800), ('3000', 3000)
-            ], default=4, onchange=self.set_elo)
-        self.elo_select_menu.add.selector('Color:', [
-            ('White', Color.WHITE), ('Black', Color.BLACK)
-            ], default=0, onchange=self.set_color_side)
-        self.elo_select_menu.add.button('Start AI Game', self.select_ai)
-        self.elo_select_menu.add.button('Back', lambda: self.main_menu.mainloop(self.surface))
+        self.elo_select_menu.add.selector(
+            "ELO level:",
+            [
+                ("400", 400),
+                ("600", 600),
+                ("800", 800),
+                ("1000", 1000),
+                ("1200", 1200),
+                ("1500", 1500),
+                ("1800", 1800),
+                ("2000", 2000),
+                ("2200", 2200),
+                ("2500", 2500),
+                ("2800", 2800),
+                ("3000", 3000),
+            ],
+            default=4,
+            onchange=self.set_elo,
+        )
+        self.elo_select_menu.add.selector(
+            "Color:", [("White", Color.WHITE), ("Black", Color.BLACK)], default=0, onchange=self.set_color_side
+        )
+        self.elo_select_menu.add.button("Start AI Game", self.select_ai)
+        self.elo_select_menu.add.button("Back", lambda: self.main_menu.mainloop(self.surface))
 
-        self.main_menu.add.button('Play / Modes', self.mode_menu)
-        self.main_menu.add.button('Quit', events.EXIT)
+        self.main_menu.add.button("Play / Modes", self.mode_menu)
+        self.main_menu.add.button("Quit", events.EXIT)
 
         self.surface = None
 

@@ -4,6 +4,7 @@ import pygame_menu
 from Enums.Piece import PieceType
 from Menus.Menu import Menu
 
+
 class PromotionMenu(Menu):
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -12,10 +13,7 @@ class PromotionMenu(Menu):
         self.selection = None
 
         self.menu = pygame_menu.Menu(
-            title='Choose Promotion',
-            width=self.WIDTH,
-            height=self.HEIGHT,
-            theme=self.custom_theme
+            title="Choose Promotion", width=self.WIDTH, height=self.HEIGHT, theme=self.custom_theme
         )
 
         self.menu.add.label("Promote to:")

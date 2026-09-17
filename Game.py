@@ -15,8 +15,8 @@ from Enums.Piece import Color
 
 import GameManager
 
-class Game:
 
+class Game:
     def __init__(self, color_side: Color = Color.WHITE, elo: Optional[int] = None):
         self.logger = logging.getLogger(self.__class__.__name__)
         self.color_side = color_side
@@ -34,6 +34,7 @@ class Game:
 
         font_path = font_module.FONT_MUNRO
         self.normal_text = pygame.font.Font(font_path, 20)
+        self.comment_text = pygame.font.Font(font_path, 18)
         self.bold_text = pygame.font.SysFont(font_path, 35, bold=True)
 
         self.IMAGES = {}
@@ -58,25 +59,29 @@ class Game:
         self.buttons = self.draw_buttons()
 
         while running:
-            self.screen.fill(pygame.Color('white'))
+            self.screen.fill(pygame.Color("white"))
             self.refresh(possiblePositions)
             self.buttons = self.draw_buttons()
 
             if self.mode == Mode.PVE and not player_turn:
-                engine_move = self.engine.get_best_move(self.board.fen()) # UCI move, ex. 'e2e4'
-                if engine_move:
-                    # Applica mossa dell'engine
+                try:
+                    engine_move = self.engine.get_best_move(self.board.fen())  # UCI move, ex. 'e2e4'
                     self.move.apply_engine_move(engine_move)
+                    player_turn = True
                     self.move_history.append(engine_move)  # puoi trasformarla in notazione standard se vuoi
-                player_turn = True
-                continue
+                except Exception as e:
+                    self.logger.error(f"Error generating move: {e}")
+                finally:
+                    continue
 
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     running = False
                 elif event.type == pygame.MOUSEBUTTONUP:
                     pos = pygame.mouse.get_pos()
-                    (running, playerClicks, possiblePositions, player_turn) = self.__handle_mouse_click(pos, playerClicks, possiblePositions, player_turn)
+                    (running, playerClicks, possiblePositions, player_turn) = self.__handle_mouse_click(
+                        pos, playerClicks, possiblePositions, player_turn
+                    )
 
                 if self.move.restart:
                     playerClicks, possiblePositions = self.restart_game()
@@ -87,7 +92,9 @@ class Game:
 
                 self.refresh(possiblePositions)
 
-    def __handle_mouse_click(self, pos: tuple[int, int], playerClicks: PosMove, possiblePositions: list[list[int]], player_turn: bool):
+    def __handle_mouse_click(
+        self, pos: tuple[int, int], playerClicks: PosMove, possiblePositions: list[list[int]], player_turn: bool
+    ):
 
         if self.buttons["reset"].is_clicked(pos):
             return True, *self.restart_game(), self._is_player_turn(True)
@@ -141,7 +148,7 @@ class Game:
         move_comment = self.engine.get_move_comment(fen_before, uci_move)
         self.logger.info(f"UCI move: {uci_move}")
         self.move_comment = f"{move_comment.quality}\n{move_comment.score} {move_comment.comment}"
-        self.logger.info(f"Move comment: {self.move_comment.replace("\n", " - ")}")
+        self.logger.info(f"Move comment: {self.move_comment.replace('\n', '; ')}")
 
     def _is_player_turn(self, player_turn: bool) -> bool:
         return self.elo is None or player_turn
@@ -150,6 +157,7 @@ class Game:
         self.board = chess.Board()
         self.move = Move(self.board, self.screen)
         self.move_history.clear()
+        self.move_comment = ""
         playerClicks = PosMove()
         possiblePositions = self.reset_possible_positions()
         return playerClicks, possiblePositions
@@ -158,22 +166,23 @@ class Game:
         return [[0 for _ in range(GameManager.DIMENSION)] for _ in range(GameManager.DIMENSION)]
 
     def loadImages(self):
-        pieces = ['bB', 'bK', 'bN', 'bp', 'bQ', 'bR', 'wB', 'wK', 'wN', 'wp', 'wQ', 'wR']
+        pieces = ["bB", "bK", "bN", "bp", "bQ", "bR", "wB", "wK", "wN", "wp", "wQ", "wR"]
 
+        dim = GameManager.SQ_SIZE - (GameManager.SQ_SIZE * 0.05)  # -5%
         for piece in pieces:
             image = f"assets/images/{piece}.png"
             try:
-                self.IMAGES[piece] = pygame.transform.scale(pygame.image.load(image), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
+                self.IMAGES[piece] = pygame.transform.scale(pygame.image.load(image), (dim, dim))
             except Exception as e:
                 self.logger.error(f"{sys.argv[0]} -> error loading image {piece}: {e}")
 
     def init_and_get_window(self) -> pygame.Surface:
         pygame.init()
         pygame.display.set_caption(GameManager.APP_NAME)
-        programIcon = pygame.image.load('assets/images/wK.png')
+        programIcon = pygame.image.load("assets/images/wK.png")
         pygame.display.set_icon(programIcon)
         screen = pygame.display.set_mode((GameManager.WINDOW_WIDTH, GameManager.HEIGHT))
-        screen.fill(pygame.Color('white'))
+        screen.fill(pygame.Color("white"))
         return screen
 
     def refresh(self, possiblePositions: list[list[int]]) -> None:
@@ -187,7 +196,7 @@ class Game:
         self.drawPieces()
 
     def drawBoard(self) -> None:
-        colors = [pygame.Color('white'), pygame.Color('gray')]
+        colors = [pygame.Color("white"), pygame.Color("gray")]
 
         for row in range(GameManager.DIMENSION):
             for col in range(GameManager.DIMENSION):
@@ -200,16 +209,16 @@ class Game:
 
                 pygame.draw.rect(self.screen, color, pygame.Rect(x, y, GameManager.SQ_SIZE, GameManager.SQ_SIZE))
 
-                # numbers to left
+                # numbers to the left
                 if col == 0:
                     label_row = 8 - row if self.color_side == Color.WHITE else row + 1
-                    text = self.normal_text.render(str(label_row), False, pygame.Color('black'))
+                    text = self.normal_text.render(str(label_row), False, pygame.Color("black"))
                     self.screen.blit(text, (GameManager.SIDEBAR_WIDTH - 18, y + 4))
 
-                # chars to down
+                # chars to the bottom
                 if row == 7:
                     label_col = chr(65 + col) if self.color_side == Color.WHITE else chr(72 - col)
-                    text = self.normal_text.render(label_col, False, pygame.Color('black'))
+                    text = self.normal_text.render(label_col, False, pygame.Color("black"))
                     self.screen.blit(text, (x + GameManager.SQ_SIZE // 2 - 6, GameManager.HEIGHT - 20))
 
     def draw_buttons(self) -> dict[str, ButtonImage]:
@@ -228,7 +237,9 @@ class Game:
         return self.buttons
 
     def drawSidebar(self) -> None:
-        pygame.draw.rect(self.screen, pygame.Color("lightgray"), pygame.Rect(0, 0, GameManager.SIDEBAR_WIDTH, GameManager.HEIGHT))
+        pygame.draw.rect(
+            self.screen, pygame.Color("lightgray"), pygame.Rect(0, 0, GameManager.SIDEBAR_WIDTH, GameManager.HEIGHT)
+        )
 
         # app name
         title = self.bold_text.render(GameManager.APP_NAME, False, pygame.Color("black"))
@@ -238,7 +249,7 @@ class Game:
         label = self.normal_text.render("Moves:", False, pygame.Color("black"))
         self.screen.blit(label, (10, 40))
 
-        y_offset = 70
+        y_offset = 60
         for i, move in enumerate(self.move_history[-15:]):  # show only the last 15 moves
             text = self.normal_text.render(move, False, pygame.Color("black"))
             self.screen.blit(text, (10, y_offset + i * 18))
@@ -250,17 +261,25 @@ class Game:
             self.buttons["menu"].update()
             self.buttons["menu"].draw()
 
-        if hasattr(self, 'move_comment') and self.move_comment:
+        if hasattr(self, "move_comment") and self.move_comment:
             comment_label = self.normal_text.render("Comment:", False, pygame.Color("black"))
-            comment_text = self.normal_text.render(self.move_comment, False, pygame.Color("blue"))
             self.screen.blit(comment_label, (10, y_offset + 15 * 18 + 10))
-            self.screen.blit(comment_text, (10, y_offset + 15 * 18 + 30))
+
+            # divide message in more lines
+            lines = self.move_comment.split("\n")
+            for i, line in enumerate(lines):
+                comment_line = self.comment_text.render(line, False, pygame.Color("blue"))
+                self.screen.blit(comment_line, (10, y_offset + 15 * 18 + 30 + i * 20))
 
     def drawHighlight(self, possiblePositions: list[list[int]]) -> None:
         if possiblePositions == [[], []]:
             return
-        image_dot = pygame.transform.scale(pygame.image.load("assets/images/black_dot.png"), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
-        image_circle = pygame.transform.scale(pygame.image.load("assets/images/black_circle.png"), (GameManager.SQ_SIZE, GameManager.SQ_SIZE))
+        image_dot = pygame.transform.scale(
+            pygame.image.load("assets/images/black_dot.png"), (GameManager.SQ_SIZE, GameManager.SQ_SIZE)
+        )
+        image_circle = pygame.transform.scale(
+            pygame.image.load("assets/images/black_circle.png"), (GameManager.SQ_SIZE, GameManager.SQ_SIZE)
+        )
 
         for i in range(GameManager.DIMENSION):
             for j in range(GameManager.DIMENSION):
@@ -279,18 +298,11 @@ class Game:
             piece = self.board.piece_at(square)
             if piece is None:
                 continue
-            color_prefix = 'w' if piece.color == chess.WHITE else 'b'
+            color_prefix = "w" if piece.color == chess.WHITE else "b"
             piece_letter = piece.symbol().lower()
             # Mappatura simboli in file immagini (es. 'p' -> 'p', 'n'->'N' ecc)
             # la tua naming sembra bP, wN, ecc. quindi mappiamo:
-            piece_map = {
-                'p': 'p',
-                'n': 'N',
-                'b': 'B',
-                'r': 'R',
-                'q': 'Q',
-                'k': 'K'
-            }
+            piece_map = {"p": "p", "n": "N", "b": "B", "r": "R", "q": "Q", "k": "K"}
             piece_name = color_prefix + piece_map[piece_letter]
             if piece_name in self.IMAGES:
                 # Calcolo coordinate disegno:
@@ -301,12 +313,15 @@ class Game:
                 draw_x = file if self.color_side == Color.WHITE else 7 - file
                 draw_y = rank if self.color_side == Color.WHITE else 7 - rank
 
-                self.screen.blit(self.IMAGES[piece_name], pygame.Rect(
-                    draw_x * GameManager.SQ_SIZE + GameManager.SIDEBAR_WIDTH,
-                    draw_y * GameManager.SQ_SIZE,
-                    GameManager.SQ_SIZE,
-                    GameManager.SQ_SIZE
-                ))
+                self.screen.blit(
+                    self.IMAGES[piece_name],
+                    pygame.Rect(
+                        draw_x * GameManager.SQ_SIZE + GameManager.SIDEBAR_WIDTH,
+                        draw_y * GameManager.SQ_SIZE,
+                        GameManager.SQ_SIZE,
+                        GameManager.SQ_SIZE,
+                    ),
+                )
             else:
                 self.logger.error(f"Cannot find image for piece {piece_name}")
 
@@ -336,7 +351,6 @@ class Game:
             return ""
 
     def _get_board_pos(self, clicked_pos: Pos) -> Pos:
-        # Converte la posizione del click secondo il lato del giocatore
         if self.color_side == Color.WHITE:
             return clicked_pos
         else:

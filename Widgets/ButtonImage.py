@@ -6,8 +6,18 @@ import logging
 
 from Entities.Pos import Pos
 
+
 class ButtonImage:
-    def __init__(self, screen: pygame.Surface, x: int, y: int, image: pygame.Surface, scale: float = 1, initial_opacity: int = 255, over_opacity: int = 255) -> None:
+    def __init__(
+        self,
+        screen: pygame.Surface,
+        x: int,
+        y: int,
+        image: pygame.Surface,
+        scale: float = 1,
+        initial_opacity: int = 255,
+        over_opacity: int = 255,
+    ) -> None:
         self.screen = screen
         self.original_image = image.convert_alpha()
         width = self.original_image.get_width()

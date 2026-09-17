@@ -2,6 +2,7 @@ import chess
 from Entities.Pos import Pos
 from Pieces.Piece import Piece
 
+
 class Pawn(Piece):
     def __init__(self, board: chess.Board, is_white_turn: bool):
         super().__init__(board, is_white_turn)

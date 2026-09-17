@@ -2,6 +2,7 @@ from pygame_menu import themes, font
 
 import GameManager
 
+
 class Menu:
     def __init__(self):
         self.custom_theme = themes.THEME_SOLARIZED.copy()

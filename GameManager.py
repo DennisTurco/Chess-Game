@@ -5,14 +5,15 @@ from Menus.MainMenu import MainMenu
 from Game import Game
 
 APP_NAME = "Chess Game"
-SIDEBAR_WIDTH = 220
+SIDEBAR_WIDTH = 280
 WIDTH = 512
 HEIGHT = 512
 WINDOW_WIDTH = WIDTH + SIDEBAR_WIDTH
-DIMENSION = 8   # dimension for chess board is 8x8
-SQ_SIZE = HEIGHT // DIMENSION   # square size
+DIMENSION = 8  # dimension for chess board is 8x8
+SQ_SIZE = HEIGHT // DIMENSION  # square size
 
-class GameManager():
+
+class GameManager:
     def __init__(self):
         self.logger = logging.getLogger(self.__class__.__name__)
         pygame.init()

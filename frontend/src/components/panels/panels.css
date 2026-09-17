@@ -1,0 +1,267 @@
+.panel {
+  background: var(--bg-1);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.backend-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--text-2);
+  margin-left: auto;
+}
+
+.backend-dot.on {
+  background: var(--success);
+  box-shadow: 0 0 6px var(--success);
+}
+
+.backend-dot.off {
+  background: var(--danger);
+}
+
+.backend-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--text-2);
+}
+
+.panel-empty {
+  font-size: 13px;
+  color: var(--text-2);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Move list */
+.move-list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.move-row {
+  display: grid;
+  grid-template-columns: 28px 1fr 1fr;
+  font-size: 14px;
+  padding: 4px 6px;
+  border-radius: var(--radius-sm);
+}
+
+.move-row:hover {
+  background: var(--bg-2);
+}
+
+button.move-row {
+  background: transparent;
+  border: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  appearance: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.move-num {
+  color: var(--text-2);
+}
+
+.move-san {
+  color: var(--text-0);
+  font-weight: 500;
+}
+
+/* Tutor panel */
+.tutor-panel {
+  gap: 14px;
+}
+
+.tutor-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 60px;
+}
+
+.tutor-comment {
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text-1);
+  margin: 0;
+}
+
+.coach-columns {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.coach-side {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--bg-2);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-md);
+  padding: 10px 12px;
+}
+
+.coach-side-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-1);
+}
+
+.coach-side-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.coach-side-dot.w {
+  background: #e9e5d8;
+}
+
+.coach-side-dot.b {
+  background: #2a2d33;
+}
+
+.coach-side-san {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+/* Captured pieces */
+.captured-row {
+  display: flex;
+  align-items: center;
+  gap: -4px;
+  min-height: 18px;
+}
+
+.captured-icon {
+  width: 16px;
+  height: 16px;
+  margin-right: -4px;
+  filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.3));
+}
+
+.material-advantage {
+  margin-left: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+/* Player bar */
+.player-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border-radius: var(--radius-md);
+  background: var(--bg-1);
+  border: 1px solid var(--border-soft);
+  transition: border-color 0.15s ease;
+}
+
+.player-bar.active {
+  border-color: var(--accent);
+}
+
+.player-identity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.player-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-3);
+  color: var(--text-1);
+  flex-shrink: 0;
+}
+
+.player-avatar.w {
+  background: #e9e5d8;
+  color: #2a2a2a;
+}
+
+.player-avatar.b {
+  background: #2a2d33;
+  color: #e9e5d8;
+}
+
+.player-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.player-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-0);
+}
+
+.player-color-dot {
+  color: var(--text-2);
+  font-size: 11px;
+}
+
+.player-clock {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text-0);
+  padding: 4px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+}
+
+.player-bar.active .player-clock {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* Game controls */
+.game-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.game-controls .btn {
+  flex: 1;
+}

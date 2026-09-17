@@ -1,0 +1,126 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400..600&family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Sober palette: deep slate + warm brass accent */
+  --bg-0: #0f1216;
+  --bg-1: #161a20;
+  --bg-2: #1c212a;
+  --bg-3: #242a35;
+  --border: #2b323f;
+  --border-soft: #232833;
+
+  --text-0: #eef1f5;
+  --text-1: #b7bfcc;
+  --text-2: #7c8494;
+
+  --accent: #c9a24c;
+  --accent-soft: #c9a24c26;
+  --accent-strong: #e4c579;
+
+  --success: #5fae7a;
+  --warning: #d9a441;
+  --danger: #d16565;
+  --info: #6f9bd1;
+
+  --board-light: #ece7dc;
+  --board-dark: #7c8b78;
+  --board-highlight: #c9a24c66;
+  --board-move-dot: #16181c99;
+  --board-last-move: #c9a24c40;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.45);
+}
+
+:root[data-theme='light'] {
+  --bg-0: #f6f4ef;
+  --bg-1: #ffffff;
+  --bg-2: #f0eee7;
+  --bg-3: #e8e5db;
+  --border: #ddd8ca;
+  --border-soft: #e6e2d5;
+
+  --text-0: #201d17;
+  --text-1: #524d40;
+  --text-2: #837c6a;
+
+  --accent: #9c7a26;
+  --accent-soft: #9c7a2622;
+  --accent-strong: #7a5f1c;
+
+  --board-light: #f2eee2;
+  --board-dark: #8a9a83;
+  --board-highlight: #9c7a2650;
+  --board-move-dot: #20180099;
+  --board-last-move: #9c7a2635;
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 16px 48px rgba(0, 0, 0, 0.12);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg-0);
+  color: var(--text-0);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-2);
+}
+
+.serif {
+  font-family: var(--font-display);
+}
+
+.mono {
+  font-family: 'SFMono-Regular', Consolas, monospace;
+}
